@@ -36,7 +36,7 @@ public class teleTest extends LinearOpMode {
             CommandScheduler.getInstance().run();
 
             //Driving (driver 1)
-            robot.getFollower().setTeleOpMovementVectors(-gamepad1.left_stick_y * robot.getSpeed(), -gamepad1.left_stick_x * robot.getSpeed(), -gamepad1.right_stick_x * robot.getSpeed() * 0.5);
+            //robot.getFollower().setTeleOpMovementVectors(-gamepad1.left_stick_y * robot.getSpeed(), -gamepad1.left_stick_x * robot.getSpeed(), -gamepad1.right_stick_x * robot.getSpeed() * 0.5);
 
         }
     }

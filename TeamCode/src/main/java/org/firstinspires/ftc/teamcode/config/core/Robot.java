@@ -38,6 +38,7 @@ public class Robot {
     public static Pose autoEndPose = new Pose();
     public AutoDriving autoDriving;
     public Pose p = new Pose();
+    public Launcher launcher;
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
@@ -50,11 +51,12 @@ public class Robot {
         this.alliance = alliance;
         this.currentMode = currentMode;
 
-        follower = Constants.createFollower(hw);
-        follower.setStartingPose(startPose);
+        /*follower = Constants.createFollower(hw);
+        follower.setStartingPose(startPose); */
         autoDriving = new AutoDriving(follower, this.telemetry);
 
-        sampleSubsystem = new SampleSubsystem(hw, telemetry);
+        launcher = new Launcher(hw, telemetry);
+
 
     }
 
@@ -66,66 +68,16 @@ public class Robot {
         this.alliance = alliance;
         this.p = startPose.copy();
 
-        follower = new Follower(this.hw, FConstants.class, LConstants.class);
-        follower.setStartingPose(startPose);
+       // follower = new Follower(this.hw, FConstants.class, LConstants.class);
+       // follower.setStartingPose(startPose);
+        launcher = new Launcher(hw, telemetry);
 
-        lift = new Lift(this.hw,this.telemetry);
-        claw = new Claw(this.hw, this.telemetry);
-        rails = new Rails(this.hw, this.telemetry);
-        hangers = new Hangers(this.hw, this.telemetry);
-
-        aInitLoop = false;
-        telemetry.addData("Start Pose", p);
+        //aInitLoop = false;
+       // telemetry.addData("Start Pose", p);
     }
 
     //Teleop Controls here
     public void dualControls(GamepadEx g1, GamepadEx g2) {
-        //Slow Controls
-        g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenActive(new InstantCommand(() -> {
-            setSpeed(.33);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenInactive(new InstantCommand(() -> {
-            setSpeed(1);
-        }));
-
-        //Press 'Back' to toggle between specimen and sample mode (driver 2)
-        g2.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::flipMode));
-
-        // Press 'x', 'y', 'a', and 'b' for roll control (driver 1)
-        g1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
-            getClaw().setRollState(Claw.RollState.NINETY);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> {
-            getClaw().setRollState(Claw.RollState.ZERO);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> {
-            getClaw().setRollState(Claw.RollState.ONE_45);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> {
-            getClaw().setRollState(Claw.RollState.TWO_45);
-        }));
-
-        //Hanging (driver 1)
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileActiveContinuous(new InstantCommand(() -> {
-            getHangers().setPower(1);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileActiveContinuous(new InstantCommand(() -> {
-            getHangers().setPower(-1);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .and(g1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)).whenInactive(new InstantCommand(() -> {
-                    getHangers().setPower(0);
-                }));
-
-        // Press 'x' to toggle claw (driver 2)
-        g2.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
-            getClaw().openClose();
-        }));
-
-        //Auto Driving (driver 1)
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
-            autoDriving.toBucket();
-        }));
     }
 
 
@@ -134,16 +86,11 @@ public class Robot {
 
 
     public void init() {
-        lift.init();
-        claw.init();
-        rails.init();
+
     }
 
     public void aPeriodic() {
         telemetry.addData("path", follower.getCurrentPath());
-        lift.periodic();
-        claw.periodic();
-        rails.periodic();
         follower.update();
         telemetry.update();
         autoEndPose = follower.getPose();
@@ -155,10 +102,6 @@ public class Robot {
 
     public void tPeriodic() {
         telemetry.addData("Robot Mode", currentMode);
-        claw.periodic();
-        rails.periodic();
-        lift.periodic();
-        hangers.periodic();
         follower.update();
         autoDriving.update();
         telemetry.update();
@@ -198,14 +141,6 @@ public class Robot {
     public Follower getFollower() {
         return follower;
     }
-
-    public Lift getLift() {
-        return lift;
-    }
-    public Claw getClaw() {return claw;}
-
-    public Rails getRails() {return rails;}
-    public Hangers getHangers() {return hangers;}
 
     public void flipMode() {
         if (currentMode == (ScoringMode.SPECIMEN))

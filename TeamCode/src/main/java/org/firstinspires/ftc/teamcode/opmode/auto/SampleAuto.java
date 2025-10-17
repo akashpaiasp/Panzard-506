@@ -22,7 +22,7 @@ public class SampleAuto extends OpModeCommand {
         schedule(
                 new RunCommand(robot::aPeriodic),
                 new SequentialCommandGroup(
-                        new FollowPath(robot.getFollower(), firstMovement(), true)
+                        //new FollowPath(robot.getFollower(), firstMovement(), true)
                 )
         );
     }
