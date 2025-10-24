@@ -2,9 +2,9 @@ package org.firstinspires.ftc.teamcode.config.core;
 
 import static org.firstinspires.ftc.teamcode.config.core.util.Opmode.*;
 
-import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.seattlesolvers.solverslib.command.InstantCommand;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.localization.PoseTracker;
@@ -22,12 +22,7 @@ import org.firstinspires.ftc.teamcode.config.util.Timer;
 
 
 public class Robot {
-    public enum ScoringMode {
-        SPECIMEN,
-        SAMPLE
-    }
     public Timer specTimer;
-    public ScoringMode currentMode;
     private HardwareMap hw;
     private Telemetry telemetry;
     private Alliance alliance;
@@ -39,23 +34,29 @@ public class Robot {
     public AutoDriving autoDriving;
     public Pose p = new Pose();
     public Launcher launcher;
+    public Turret turret;
+    public Hood hood;
+    public boolean slowMode;
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
 
     //For TeleOp
-    public Robot(HardwareMap hw, Telemetry telemetry, Alliance alliance, Pose startPose, ScoringMode currentMode) {
+    public Robot(HardwareMap hw, Telemetry telemetry, Alliance alliance) {
         this.op = TELEOP;
         this.hw = hw;
         this.telemetry = telemetry;
         this.alliance = alliance;
-        this.currentMode = currentMode;
 
         /*follower = Constants.createFollower(hw);
-        follower.setStartingPose(startPose); */
+        follower.setStartingPose(startPose);
+        follower.update();
+        */
         autoDriving = new AutoDriving(follower, this.telemetry);
 
         launcher = new Launcher(hw, telemetry);
+        turret = new Turret(hw, telemetry);
+        //hood = new Hood(hw, telemetry);
 
 
     }
@@ -78,6 +79,8 @@ public class Robot {
 
     //Teleop Controls here
     public void dualControls(GamepadEx g1, GamepadEx g2) {
+
+
     }
 
 
@@ -101,7 +104,6 @@ public class Robot {
     }
 
     public void tPeriodic() {
-        telemetry.addData("Robot Mode", currentMode);
         follower.update();
         autoDriving.update();
         telemetry.update();
@@ -142,10 +144,4 @@ public class Robot {
         return follower;
     }
 
-    public void flipMode() {
-        if (currentMode == (ScoringMode.SPECIMEN))
-            currentMode = ScoringMode.SAMPLE;
-        else
-            currentMode = ScoringMode.SPECIMEN;
-    }
 }

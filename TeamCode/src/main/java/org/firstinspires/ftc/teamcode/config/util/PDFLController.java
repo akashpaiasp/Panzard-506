@@ -2,43 +2,70 @@ package org.firstinspires.ftc.teamcode.config.util;
 
 import com.acmerobotics.dashboard.config.Config;
 
+import org.opencv.core.Mat;
+
 @Config
 public class PDFLController {
-    private static double kP, kD, kF, kL;
+    //
+    private static double kP, kD, kF, kL, kI;
 
     private static double deadzone;
 
     private static double target;
 
-    public double p, d, f, l;
+    private double p, d, f, l, i;
 
     private double current;
 
-    public double delta_time;
-    public double delta_error;
-    public double risePercent = 0.01;
-    public boolean reached = false;
+    private double delta_time;
+    private double delta_error;
+    private double risePercent = 0.01;
+    private int reached = 0;
 
-    public double riseTime = 0.0;
+    //Rise time = amount of time it takes to reach
+    //Timer to track the amount of time passed each time the loop is run
     private Timer timer = new Timer();
+    //Timer to track rise time
     private Timer riseTimer = new Timer();
+    private boolean settled = true;
+    private double
+            tot_error = 0.0,
+            prev_error = 0.0,
+            error = 0.0,
+            error2 = 0.0,
+            reachedThreshold = 30,
+            settledThreshold = 200,
+            riseTime = 0,
+            settlingTime = 0,
+            lastRise = 0,
+            lastSettle = 0;
 
-    private double error = 0;
 
-    private RingBuffer<Double> timeBuffer = new RingBuffer<>(3, 0.0);
+
+    private long
+            prev_time = 0,
+            curr_time = 0;
+
+
+
+    //Error is the difference between the target and the real values
+
+    private RingBuffer<Long> timeBuffer = new RingBuffer<>(3, 0L);
     private RingBuffer<Double> errorBuffer = new RingBuffer<>(3, 0.0);
-    public PDFLController(double kP, double kD, double kF, double kL) {
+    public PDFLController(double kP, double kD, double kF, double kL, double kI) {
         this.kP = kP;
         this.kD = kD;
         this.kF = kF;
         this.kL = kL;
+        this.kI = kI;
     }
 
-    public void updateConstants(double kP, double kD, double kF, double kL) {
+    public void updateConstants(double kP, double kD, double kF, double kL, double kI) {
         this.kP = kP;
         this.kD = kD;
         this.kF = kF;
         this.kL = kL;
+        this.kI = kI;
     }
 
     public void setDeadZone(double deadZone) {
@@ -46,7 +73,7 @@ public class PDFLController {
     }
 
     public void reset() {
-        timeBuffer.fill(0.0);
+        timeBuffer.fill(0L);
         errorBuffer.fill(0.0);
         timer.reset();
         riseTimer.reset();
@@ -54,20 +81,38 @@ public class PDFLController {
     }
 
     public double run() {
+        //reachedThreshold = target * risePercent;
         error = target - current;
+        error2 = error;
+        if (prev_error > 0 && error < 0 || prev_error < 0 && error > 0 || error == 0) {
+            error2 = 0;
+        }
+        if (target == 0)
+            tot_error = 0;
+        curr_time = timer.getElapsedTime();
 
-        double time = timer.getElapsedTime();
+        prev_time = timeBuffer.add(curr_time);
+        prev_error = errorBuffer.add(error);
 
-        double previous_time = timeBuffer.add(time);
-        double previous_error = errorBuffer.add(error);
+         delta_time = curr_time - prev_time;
+         delta_error = error - prev_error;
 
-         delta_time = time - previous_time;
-         delta_error = error - previous_error;
-
-         //If we have reached the target velocity with minimal oscillations
-         if (Math.abs(error) < target * risePercent && delta_error < 100) {
-             reached = true;
+         //If we have reached within a percentage of the target velocity
+         if (Math.abs(error) < target * risePercent || Math.abs(error) < reachedThreshold) {
+             reached++;
          }
+         //If fluctuations exceed a threshold, velocity is not settled
+         if (delta_error > settledThreshold) {
+             settled = false;
+             lastSettle = timer.getElapsedTimeSeconds();
+         }
+         else if (!settled) {
+             settled = true;
+             settlingTime = lastSettle - timer.getElapsedTimeSeconds();
+         }
+
+
+
 
         //If PDFL hasn't been updated, reset it
 
@@ -77,8 +122,8 @@ public class PDFLController {
         }
 
         //If we have reached the target, log rise time
-        if (reached) {
-             riseTime = riseTimer.getElapsedTimeSeconds();
+        if (reached == 1) {
+             riseTime = timer.getElapsedTimeSeconds() - lastRise;
         }
 
 
@@ -87,12 +132,17 @@ public class PDFLController {
          f = fComponent();
          l = lComponent(error);
 
+
         double response;
         if (Math.abs(error) < deadzone) {
             response = p+d+f;
         }
         else {
             response = p + d + f + l;
+            if (Math.abs(response) < 1) {
+                i = iComponent(tot_error);
+                response += i;
+            }
         }
         return response;
     }
@@ -104,7 +154,7 @@ public class PDFLController {
     public double dComponent(double delta_error, double delta_time) {
         double derivative = delta_error / delta_time;
 
-        double response = derivative *kD;
+        double response = derivative * kD;
         return response;
     }
     public double fComponent() {
@@ -116,6 +166,12 @@ public class PDFLController {
         double response = direction * kL;
         return response;
     }
+    public double iComponent(double total_error) {
+        tot_error += error2;
+        double response = kI * tot_error;
+        return response;
+    }
+
 
     public double getTarget() {
         return target;
@@ -126,10 +182,70 @@ public class PDFLController {
 
     public void update(double current, double target) {
         if (target != getTarget()) {
-            reached = false;
-            riseTimer.reset();
+            reached = 0;
+            //riseTimer.reset();
+            lastRise = timer.getElapsedTime();
         }
         this.target = target;
         this.current = current;
+    }
+    public double getError() {
+        return error;
+    }
+
+    public double getDelta_time() {
+        return delta_time;
+    }
+
+    public double getDelta_error() {
+        return delta_error;
+    }
+
+    public double getRisePercent() {
+        return risePercent;
+    }
+
+    public int getReached() {
+        return reached;
+    }
+
+    public double getRiseTime() {
+        return riseTime;
+    }
+
+    public double getI() {
+        return i;
+    }
+
+    public double getF() {
+        return f;
+    }
+
+    public double getL() {
+        return l;
+    }
+
+    public double getD() {
+        return d;
+    }
+
+    public double getP() {
+        return p;
+    }
+
+    public double getReachedThreshold() {
+        return reachedThreshold;
+    }
+
+    public double getTot_error() {
+        return tot_error;
+    }
+
+    public boolean isSettled() {
+        return settled;
+    }
+
+    public double getSettlingTime() {
+        return settlingTime;
     }
 }

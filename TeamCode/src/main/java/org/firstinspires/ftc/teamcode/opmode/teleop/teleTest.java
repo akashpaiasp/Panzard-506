@@ -2,8 +2,8 @@ package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
 
-import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.config.core.Robot;
@@ -16,7 +16,7 @@ public class teleTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         //Initialize Hardware
-        robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose, Robot.ScoringMode.SAMPLE);
+        robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose);
         robot.init();
 
         //Initialize Gamepads
@@ -36,7 +36,11 @@ public class teleTest extends LinearOpMode {
             CommandScheduler.getInstance().run();
 
             //Driving (driver 1)
-            //robot.getFollower().setTeleOpMovementVectors(-gamepad1.left_stick_y * robot.getSpeed(), -gamepad1.left_stick_x * robot.getSpeed(), -gamepad1.right_stick_x * robot.getSpeed() * 0.5);
+            robot.getFollower().setTeleOpDrive(
+                    -gamepad1.left_stick_y,
+                    -gamepad1.left_stick_x,
+                    -gamepad1.right_stick_x)
+            ;
 
         }
     }

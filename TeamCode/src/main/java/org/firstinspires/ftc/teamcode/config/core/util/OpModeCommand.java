@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.config.core.util;
 
-import com.arcrobotics.ftclib.command.Command;
-import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.Subsystem;
+import com.seattlesolvers.solverslib.command.Command;
+import com.seattlesolvers.solverslib.command.CommandScheduler;
+import com.seattlesolvers.solverslib.command.Subsystem;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.seattlesolvers.solverslib.command.RunCommand;
+import com.seattlesolvers.solverslib.command.SequentialCommandGroup;
 
 public abstract class OpModeCommand extends OpMode {
 
@@ -24,7 +26,7 @@ public abstract class OpModeCommand extends OpMode {
     /**
      * Schedules {@link Command} objects to the scheduler
      */
-    public void schedule(Command... commands) {
+    public void schedule(RunCommand runCommand, SequentialCommandGroup sequentialCommandGroup, Command... commands) {
         CommandScheduler.getInstance().schedule(commands);
     }
 

@@ -2,10 +2,14 @@
 
 package org.firstinspires.ftc.teamcode.config.subsystems;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -14,8 +18,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D; // ? needed ?
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 import java.util.List;
---------------------
-
 //subsystem of the limelight 3A
 public class Limelight extends SubsystemBase {
     //for telemetry of the limelight
@@ -35,11 +37,11 @@ public class Limelight extends SubsystemBase {
         limelight.start();
     }
     
-    public startLimelight() {
+    public void startLimelight() {
         limelight.start();
     }
 
-    public stopLimelight() {
+    public void stopLimelight() {
         limelight.stop();
     }
 

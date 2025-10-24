@@ -3,16 +3,16 @@ package org.firstinspires.ftc.teamcode.config.subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.PIDController;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.seattlesolvers.solverslib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.config.core.MyPIDController;
 import org.firstinspires.ftc.teamcode.config.util.PDFLController;
+import org.firstinspires.ftc.teamcode.config.util.Timer;
 
 /*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
@@ -29,22 +29,32 @@ public class Launcher extends SubsystemBase {
     public DcMotorEx launcher2;
 
     private PDFLController controller;
-    public static double p = 0.000005;
-    public static double d = 0.00185;
-    public static double f = 0.0000001;
-    public static double l = 0.00007;
 
-    public static double target = 500;
-    public static double current = 0;
+    //pdfl values tuned in FTC Dashboard
+    public static double p = 0.005;
+    public static double d = 0.0000001;
+    public static double f = 0;
+    public static double l = 0.0327;
+    public static double i = 0.000025;
+
+    public static double target_velocity = 500;
+    public static double current_velocity = 0;
     public double currentPower = 0;
     public double pdfl = 0;
 
-    private static double power = 0;
+    private double power = 0;
 
     public static double test1 = 0;
     public static double test2 = 0;
 
     public long lastUpdateTime = 0;
+    private Timer timer = new Timer();
+    private double delta_time = 0;
+    private long last_time = 0;
+    private long curr_time = 0;
+    private int last_position = 0;
+    private int curr_position = 0;
+    private int delta_pos = 0;
 
 
 
@@ -55,10 +65,13 @@ public class Launcher extends SubsystemBase {
         //init servos based on their name in the robot's config file
         launcher1 = hardwareMap.get(DcMotorEx.class, "cm0");
         launcher2 = hardwareMap.get(DcMotorEx.class, "cm1");
-        launcher2.setDirection(DcMotorSimple.Direction.REVERSE);
+        launcher1.setDirection(DcMotorSimple.Direction.REVERSE);
+        launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        controller = new PDFLController(p, d, f, l);
+        controller = new PDFLController(p, d, f, l, i);
         controller.reset();
+        timer.reset();
     }
 
     //Call this method to open/close the servos
@@ -66,11 +79,25 @@ public class Launcher extends SubsystemBase {
     /*Periodic method gets run in a loop during auto and teleop.
     The telemetry gets updated constantly so you can see the status of the subsystems */
     public void periodic() {
-        current = tickstoRPM(launcher1.getVelocity());
-        controller.update(current, target);
+        last_position = curr_position;
+        last_time = curr_time;
+
+        //current_velocity = tickstoRPM(launcher1.getVelocity());
+
+
+        curr_position = launcher1.getCurrentPosition();
+        curr_time = timer.getElapsedTime();
+
+        delta_time = (timer.getElapsedTime() - last_time) / 1000.0;
+        delta_pos = curr_position - last_position;
+        current_velocity = tickstoRPM(launcher1.getVelocity());//tickstoRPM((double)(delta_pos) / delta_time);
+
+
+        controller.update(current_velocity, target_velocity);
         pdfl = controller.run();
-        power = currentPower + pdfl;
-        power = Range.clip(power, 0, 1);
+        power =  pdfl;
+        //power = test1;
+        power = Range.clip(power, -1, 1);
         currentPower = power;
 
         // Clamp power between -1 and 1
@@ -79,27 +106,40 @@ public class Launcher extends SubsystemBase {
         launcher1.setPower(power);
         launcher2.setPower(power);
 
-        controller.updateConstants(p, d, f, l);
+        controller.updateConstants(p, d, f, l, i);
 
-        telemetry.addData("Launcher1 Velocity", tickstoRPM(launcher1.getVelocity()));
-        telemetry.addData("Launcher2 Velocity", tickstoRPM(launcher2.getVelocity()));
+        telemetry.addData("Launcher1 Velocity", current_velocity);
 
         telemetry.addData("pdfl", pdfl);
 
-        telemetry.addData("Target", target);
+        telemetry.addData("Target", target_velocity);
 
-        telemetry.addData("p", controller.p);
-        telemetry.addData("d", controller.d);
-        telemetry.addData("f", controller.f);
-        telemetry.addData("l", controller.l);
+        telemetry.addData("p", controller.getP());
+        telemetry.addData("d", controller.getD());
+        telemetry.addData("f", controller.getF());
+        telemetry.addData("l", controller.getL());
+        telemetry.addData("i", controller.getI());
 
-        telemetry.addData("dt", controller.delta_time);
-        telemetry.addData("de", controller.delta_error);
+        telemetry.addData("dt", controller.getDelta_time());
+        telemetry.addData("de", controller.getDelta_error());
 
         telemetry.addData("power", power);
 
-        telemetry.addData("Reached target", controller.reached);
-        telemetry.addData("Rise time", controller.riseTime);
+        telemetry.addData("Reached target", controller.getReached());
+        telemetry.addData("Rise time", controller.getRiseTime());
+
+        telemetry.addData("Settled", controller.isSettled());
+        telemetry.addData("Settling time", controller.getSettlingTime());
+
+        telemetry.addData("Error", controller.getError());
+        telemetry.addData("Reached Threshold" , controller.getReachedThreshold());
+
+        telemetry.addData("Position", launcher1.getCurrentPosition());
+
+        telemetry.addData("Delta Time 2", delta_time);
+        telemetry.addData("Delta Position", delta_pos);
+
+        telemetry.addData("Total Error", controller.getTot_error());
 
 
 
@@ -108,7 +148,7 @@ public class Launcher extends SubsystemBase {
     }
 
     public double tickstoRPM(double velocity) {
-        return velocity * 60/28;
+        return velocity * 60.0/28.0;
         //return
     }
     //.1 = 140

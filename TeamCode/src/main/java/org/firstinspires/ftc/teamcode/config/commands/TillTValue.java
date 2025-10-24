@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.config.commands;
 
-import com.arcrobotics.ftclib.command.CommandBase;
+import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 

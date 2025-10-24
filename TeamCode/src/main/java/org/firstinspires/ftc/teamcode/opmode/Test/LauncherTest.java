@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.opmode;
+package org.firstinspires.ftc.teamcode.opmode.Test;
 
 import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
 
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 

@@ -9,18 +9,16 @@ public class SampleAuto {
     public static final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
     private static final Pose pose2 = new Pose(10, 10, Math.toRadians(0));
-    private static Follower f;
-
-    public SampleAuto(Follower f) {
-        this.f = f;
-    }
 
 
-    public static PathChain firstMovement() {
-        return new f.pathBuilder()
+    public static PathChain firstMovement(Follower f) {
+        PathChain chain = f.pathBuilder()
                 .addPath(new BezierLine(startPose, pose2))
                 .setLinearHeadingInterpolation(startPose.getHeading(), pose2.getHeading())
                 .build();
+
+        return chain;
+
     }
 
 }

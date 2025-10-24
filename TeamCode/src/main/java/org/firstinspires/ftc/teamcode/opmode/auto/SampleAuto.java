@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmode.auto;
 
-import static org.firstinspires.ftc.teamcode.config.core.paths.autonomous.SampleAuto.*;
+import static org.firstinspires.ftc.teamcode.config.core.paths.autonomous.SampleAuto.firstMovement;
+import static org.firstinspires.ftc.teamcode.config.core.paths.autonomous.SampleAuto.startPose;
 
-import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.pedropathing.commands.FollowPath;
+import com.seattlesolvers.solverslib.command.*;
+import com.seattlesolvers.solverslib.pedroCommand.FollowPathCommand;
 
 import org.firstinspires.ftc.teamcode.config.core.Robot;
-import org.firstinspires.ftc.teamcode.config.core.util.*;
+import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
+import org.firstinspires.ftc.teamcode.config.core.util.OpModeCommand;
 
 
 public class SampleAuto extends OpModeCommand {
@@ -22,7 +23,7 @@ public class SampleAuto extends OpModeCommand {
         schedule(
                 new RunCommand(robot::aPeriodic),
                 new SequentialCommandGroup(
-                        //new FollowPath(robot.getFollower(), firstMovement(), true)
+                        new FollowPathCommand(robot.getFollower(), firstMovement(robot.getFollower()))
                 )
         );
     }
