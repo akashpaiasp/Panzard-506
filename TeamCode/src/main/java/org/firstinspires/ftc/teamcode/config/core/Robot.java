@@ -37,6 +37,7 @@ public class Robot {
     public Turret turret;
     public Hood hood;
     public boolean slowMode;
+    public Limelight limelight;
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
@@ -56,6 +57,7 @@ public class Robot {
 
         launcher = new Launcher(hw, telemetry);
         turret = new Turret(hw, telemetry);
+        limelight = new Limelight(hw, telemetry);
         //hood = new Hood(hw, telemetry);
 
 
@@ -69,9 +71,10 @@ public class Robot {
         this.alliance = alliance;
         this.p = startPose.copy();
 
-       // follower = new Follower(this.hw, FConstants.class, LConstants.class);
-       // follower.setStartingPose(startPose);
+        // follower = new Follower(this.hw, FConstants.class, LConstants.class);
+        // follower.setStartingPose(startPose);
         launcher = new Launcher(hw, telemetry);
+        limelight = new Limelight(hw, telemetry);
 
         //aInitLoop = false;
        // telemetry.addData("Start Pose", p);

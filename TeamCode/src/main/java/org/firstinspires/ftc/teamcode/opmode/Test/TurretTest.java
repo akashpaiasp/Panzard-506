@@ -15,7 +15,7 @@ public class TurretTest extends LinearOpMode {
 
         public void runOpMode() throws InterruptedException {
             //Initialize Hardware
-            robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose, Robot.ScoringMode.SAMPLE);
+            robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose);
             robot.init();
             waitForStart();
 

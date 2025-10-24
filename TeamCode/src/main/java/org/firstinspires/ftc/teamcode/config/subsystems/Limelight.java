@@ -4,11 +4,13 @@ package org.firstinspires.ftc.teamcode.config.subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 //import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -26,8 +28,10 @@ public class Limelight extends SubsystemBase {
     //limelight class - should probably figure out whats inside
     private Limelight3A limelight;
 
-    public Limelight() {
+    public Limelight(HardwareMap hardwareMap, Telemetry telemetry) {
         //links to limelight - need to make sure it connect properly
+        this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         //default pipeline - can be changed later
