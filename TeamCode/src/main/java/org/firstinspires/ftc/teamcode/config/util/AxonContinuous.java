@@ -13,7 +13,7 @@ public class AxonContinuous {
     private double numRotations = 0;
     private boolean forward = true;
     private double lastVoltage = 0;
-    private double threshold = 1;
+    private double threshold = .28;
     private double partial_rotations = 0;
     private double full_rotations = 0;
     private double last_rotations = 0;

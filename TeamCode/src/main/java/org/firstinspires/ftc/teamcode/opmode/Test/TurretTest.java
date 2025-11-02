@@ -20,7 +20,7 @@ public class TurretTest extends LinearOpMode {
             waitForStart();
 
             while(opModeIsActive()) {
-                robot.turret.periodic();
+                robot.turret.periodicTest();
             }
     }
 }

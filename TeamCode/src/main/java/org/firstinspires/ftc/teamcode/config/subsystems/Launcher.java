@@ -32,10 +32,10 @@ public class Launcher extends SubsystemBase {
 
     //pdfl values tuned in FTC Dashboard
     public static double p = 0.005;
-    public static double d = 0.0000001;
+    public static double d = 0.01;
     public static double f = 0;
-    public static double l = 0.0327;
-    public static double i = 0.000025;
+    public static double l = 0.08;
+    public static double i = 0.001;
 
     public static double target_velocity = 500;
     public static double current_velocity = 0;
@@ -56,6 +56,14 @@ public class Launcher extends SubsystemBase {
     private int curr_position = 0;
     private int delta_pos = 0;
 
+    public enum LauncherState {
+        IN,
+        OUT,
+        STOP
+    }
+
+    public LauncherState current = LauncherState.STOP;
+
 
 
     public Launcher(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -63,9 +71,9 @@ public class Launcher extends SubsystemBase {
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         //init servos based on their name in the robot's config file
-        launcher1 = hardwareMap.get(DcMotorEx.class, "cm0");
-        launcher2 = hardwareMap.get(DcMotorEx.class, "cm1");
-        launcher1.setDirection(DcMotorSimple.Direction.REVERSE);
+        launcher1 = hardwareMap.get(DcMotorEx.class, "em0");
+        launcher2 = hardwareMap.get(DcMotorEx.class, "cm0");
+        launcher2.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -78,7 +86,7 @@ public class Launcher extends SubsystemBase {
 
     /*Periodic method gets run in a loop during auto and teleop.
     The telemetry gets updated constantly so you can see the status of the subsystems */
-    public void periodic() {
+    public void periodicTest() {
         last_position = curr_position;
         last_time = curr_time;
 
@@ -95,7 +103,7 @@ public class Launcher extends SubsystemBase {
 
         controller.update(current_velocity, target_velocity);
         pdfl = controller.run();
-        power =  pdfl;
+        power =  target_velocity != 0 ? pdfl : 0;
         //power = test1;
         power = Range.clip(power, -1, 1);
         currentPower = power;
@@ -147,9 +155,53 @@ public class Launcher extends SubsystemBase {
 
     }
 
+    public void setLauncherState(LauncherState state) {
+        current = state;
+    }
+
+    public void periodic() {
+        current_velocity = tickstoRPM(launcher1.getVelocity());
+
+
+        // Clamp power between -1 and 1
+        //power = Math.max(-1, Math.min(1, power));
+        if (current == LauncherState.OUT) {
+            //launcher1.setPower(power);
+            //launcher2.setPower(power);
+            launcher1.setPower(1);
+            launcher2.setPower(1);
+        }
+        else if (current == LauncherState.IN){
+            launcher1.setPower(-.5);
+            launcher2.setPower(-.5);
+        }
+
+        else {
+            /*target_velocity = 0;
+            controller.update(current_velocity, target_velocity);
+            pdfl = controller.run();
+            power =  pdfl;
+            //power = test1;
+            power = Range.clip(power, -1, 1); */
+            launcher1.setPower(0);
+            launcher2.setPower(0);
+        }
+
+        telemetry.addData("Velocity", current_velocity);
+        telemetry.addData("Power", launcher1.getPower());
+
+
+    }
+
     public double tickstoRPM(double velocity) {
         return velocity * 60.0/28.0;
         //return
+    }
+
+    public void init() {
+        setLauncherState(LauncherState.STOP);
+        launcher1.setPower(0);
+        launcher2.setPower(0);
     }
     //.1 = 140
     //.2 = 380

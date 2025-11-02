@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.subsystems.Limelight;
 
 @TeleOp
-public class LightlightTest extends LinearOpMode {
+public class LimelightTest extends LinearOpMode {
     private Robot robot;
 
     public void runOpMode() throws InterruptedException {

@@ -58,6 +58,8 @@ public class PDFLController {
         this.kF = kF;
         this.kL = kL;
         this.kI = kI;
+
+        timer.reset();
     }
 
     public void updateConstants(double kP, double kD, double kF, double kL, double kI) {
