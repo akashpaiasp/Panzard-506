@@ -19,7 +19,7 @@ such as a claw or a lift.
 @Config
 public class Turret extends SubsystemBase {
     //Telemetry = text that is printed on the driver station while the robot is running
-    public static double power = 0;
+    public double power = 0;
 
     public static double offset = -6.9;
     //public static boolean powerMode = false;
@@ -71,17 +71,13 @@ public class Turret extends SubsystemBase {
 
     public void periodicTest2() {
         spin.calculate();
-        spin.calculate2();
-
 
         spin.setPower(power);
 
-        telemetry.addData("4 velocity full rotations", spin.getFull_rotations());
-        telemetry.addData("4 velocity partial rotations", spin.getPartial_rotations());
-        telemetry.addData("2 velocity full rotations", spin.getFull_rotations2());
-        telemetry.addData("2 velocity partial rotations", spin.getPartial_rotations2());
-
-        telemetry.addData("Velocities", spin.voltages.toString());
+        telemetry.addData("Raw", spin.getVolts());
+        telemetry.addData("Rotations", spin.getNumRotations());
+        telemetry.addData("Partial rotations", spin.getPartial_rotations());
+        telemetry.addData("Partial rotations", spin.getFull_rotations());
         telemetry.update();
     }
 
