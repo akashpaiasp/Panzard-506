@@ -36,8 +36,8 @@ public class TelePop extends LinearOpMode {
         while (opModeIsActive()) {
             //Update everything
             robot.tPeriodic();
-            /*
-            if (gamepad2.left_trigger > 0.3)
+
+            if (gamepad1.left_trigger > 0.3)
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
             else if (gamepad2.right_trigger > 0.3)
                 robot.intake.setIntakeState(Intake.IntakeState.OUTTAKE);
@@ -45,13 +45,8 @@ public class TelePop extends LinearOpMode {
                 robot.intake.setIntakeState(Intake.IntakeState.STOP);
 
             if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
-                robot.launcherOn = false;
                 robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
             }
-            else {
-                robot.launcherOn = true;
-            } */
-
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
 

@@ -41,7 +41,7 @@ public class Robot {
     public Limelight limelight;
     public DriveTrain driveTrain;
     public Intake intake;
-    public boolean robotCentric = true;
+    public boolean robotCentric = false;
     public static Alliance alliance = Alliance.BLUE;
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
@@ -81,7 +81,7 @@ public class Robot {
         this.p = startPose.copy();
 
         follower = Constants.createFollower(hw);
-        // follower.setStartingPose(startPose);
+        follower.setStartingPose(startPose);
 
         launcher = new Launcher(hw, telemetry);
         turret = new Turret(hw, telemetry);
@@ -135,7 +135,7 @@ public class Robot {
             hood.setState(Hood.HoodState.UP);
         } ));
 
-
+        /*
         lTG1.whenActive(new InstantCommand(() -> {
             intake.setIntakeState(Intake.IntakeState.INTAKE);
         }));
@@ -144,10 +144,10 @@ public class Robot {
         }));
         rTG2.and(lTG1).whenInactive(new InstantCommand(() -> {
             intake.setIntakeState(Intake.IntakeState.STOP);
-        }));
+        })); */
 
         g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(() -> {
-            robotCentric = false;
+            robotCentric = true;
         }));
 
 
