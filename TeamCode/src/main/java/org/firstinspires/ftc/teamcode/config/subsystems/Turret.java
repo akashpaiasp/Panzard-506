@@ -27,11 +27,12 @@ public class Turret extends SubsystemBase {
    // public static double turretPosConstant = 0.51;
    // public boolean first = false;
 
-    public static double p = 0.03, i = 0.0003, d = .000001, f = 0, l = 0.02;
+    public static double p = 0.03, i = 0, d = 1, f = 0, l = 0.02;
     public PDFLController controller;
 
     public static double target = 0.0;
     public double current;
+    public boolean usePID = true;
 
 
     private MultipleTelemetry telemetry;
@@ -77,18 +78,24 @@ public class Turret extends SubsystemBase {
         telemetry.addData("Raw", spin.getVolts());
         telemetry.addData("Rotations", spin.getNumRotations());
         telemetry.addData("Partial rotations", spin.getPartial_rotations());
-        telemetry.addData("Partial rotations", spin.getFull_rotations());
+        telemetry.addData("Full rotations", spin.getFull_rotations());
         telemetry.update();
     }
 
-    /*
+
 
     public void periodic() {
-        if (!first) {
-            spin.setPosition(turretPosConstant);
-            first = true;
-        }
-    } */
+        spin.calculate();
+        current = (Math.round(getTotalDegrees() * 10.0)) / 10.0;
+        controller.update(current, target);
+        if (usePID)
+            power = controller.run();
+
+        power = Range.clip(power, -1, 1);
+
+        spin.setPower(power);
+
+    }
 
     /*
     public void periodicTest() {

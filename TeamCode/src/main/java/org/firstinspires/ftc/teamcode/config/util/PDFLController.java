@@ -28,13 +28,14 @@ public class PDFLController {
     //Timer to track rise time
     private Timer riseTimer = new Timer();
     private boolean settled = true;
+    public boolean done = false;
     private double
             tot_error = 0.0,
             prev_error = 0.0,
             error = 0.0,
             error2 = 0.0,
             reachedThreshold = 30,
-            settledThreshold = 200,
+            settledThreshold = 50,
             riseTime = 0,
             settlingTime = 0,
             lastRise = 0,
@@ -104,9 +105,12 @@ public class PDFLController {
              reached++;
          }
          //If fluctuations exceed a threshold, velocity is not settled
-         if (delta_error > settledThreshold) {
-             settled = false;
-             lastSettle = timer.getElapsedTimeSeconds();
+         if (Math.abs(delta_error) > settledThreshold) {
+             if (settled) {
+                 settled = false;
+                 lastSettle = timer.getElapsedTimeSeconds();
+             }
+
          }
          else if (!settled) {
              settled = true;
@@ -127,6 +131,8 @@ public class PDFLController {
         if (reached == 1) {
              riseTime = timer.getElapsedTimeSeconds() - lastRise;
         }
+
+        done = reached > 0 && settled;
 
 
          p = pComponent(error);
@@ -186,7 +192,7 @@ public class PDFLController {
         if (target != getTarget()) {
             reached = 0;
             //riseTimer.reset();
-            lastRise = timer.getElapsedTime();
+            lastRise = timer.getElapsedTimeSeconds();
         }
         this.target = target;
         this.current = current;

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 
 public class AxonContinuous {
     private CRServo c;
@@ -18,12 +19,17 @@ public class AxonContinuous {
     private double full_rotations = 0;
     private double last_rotations = 0;
     private double servoPower = 0;
+    public Timer resetTime = new Timer();
+    public double lastTimeNeg = 0;
+    public double lastTimePos = 0;
+    public double timeThreshold = 0.05;
 
 
 
     public AxonContinuous(HardwareMap hwMap, String hw1, String hw2) {
         c = hwMap.get(CRServo.class, hw1);
         a = hwMap.get(AnalogInput.class, hw2);
+        resetTime.reset();
     }
 
     public CRServo getC() {
@@ -35,7 +41,7 @@ public class AxonContinuous {
     }
 
     public double getVolts() {
-        return a.getVoltage();
+        return Math.round(a.getVoltage() * 100.0) / 100.0;
     }
 
     public void update() {
@@ -47,12 +53,18 @@ public class AxonContinuous {
             c.setPower(servoPower);
     }
 
+    //make it so that u cant do multiple thingys within a certain time period
+
     public void calculate() {
         double v = getVolts();
             if (Math.abs(v - lastVoltage) > threshold) {
-                if (v > lastVoltage)
+                if (v > lastVoltage && resetTime.getElapsedTimeSeconds() - lastTimeNeg > timeThreshold) {
                     full_rotations--;
-                else full_rotations++;
+                    lastTimeNeg = resetTime.getElapsedTimeSeconds();
+                }
+                else if (v < lastVoltage && resetTime.getElapsedTimeSeconds() - lastTimePos > timeThreshold)
+                    full_rotations++;
+                lastTimePos = resetTime.getElapsedTimeSeconds();
             }
 
         partial_rotations = v / 3.3;

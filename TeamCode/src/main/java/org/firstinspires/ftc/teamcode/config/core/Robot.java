@@ -44,6 +44,10 @@ public class Robot {
     public boolean robotCentric = false;
     public static Alliance alliance = Alliance.BLUE;
 
+    public static double goalX = 72;
+    public static double blueY = 72;
+    public static double redY = 72;
+
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
 
@@ -97,6 +101,8 @@ public class Robot {
 
     //Teleop Controls here
     public void dualControls(GamepadEx g1, GamepadEx g2) {
+
+
         // Left and Right triggers on both controllers
         Trigger lTG1 = new Trigger(() -> g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER ) > 0.3);
         Trigger lTG2 = new Trigger(() -> g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER ) > 0.3);
@@ -104,22 +110,22 @@ public class Robot {
         Trigger rTG2 = new Trigger(() -> g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER ) > 0.3);
 
         //Buttons
+
+        /*(
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             intake.setUptakeState(Intake.UptakeState.ON);
         }));
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenInactive(new InstantCommand(() -> {
             intake.setUptakeState(Intake.UptakeState.OFF);
-        }));
+        })); */
+
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new Fire(this));
 
         g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.OUT);
         }));
         g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.IN);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .and(g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).whenInactive(new InstantCommand(() -> {
-            launcher.setLauncherState(Launcher.LauncherState.STOP);
         }));
 
         g2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> {
@@ -149,6 +155,8 @@ public class Robot {
         g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(() -> {
             robotCentric = true;
         }));
+        g2.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::flipAlliance));
+        new Aim(this, goalX, getAlliance() == Alliance.BLUE ? blueY : redY);
 
 
 
@@ -186,12 +194,15 @@ public class Robot {
 
     public void tPeriodic() {
         follower.update();
+        telemetry.update();
+        /*
         //autoDriving.update();
         telemetry.update();
         turret.periodic();
         launcher.periodic();
         intake.periodic();
         hood.periodic();
+        */
 
     }
 
@@ -228,6 +239,11 @@ public class Robot {
 
     public Follower getFollower() {
         return follower;
+    }
+
+    public void flipAlliance() {
+        if (alliance == Alliance.BLUE) setAlliance(Alliance.RED);
+        else setAlliance(Alliance.BLUE);
     }
 
 }

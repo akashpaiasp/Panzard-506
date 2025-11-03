@@ -12,9 +12,9 @@ import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.config.subsystems.Launcher;
 
-@TeleOp
+@TeleOp (name = "TelePop")
 
-public class TelePop extends LinearOpMode {
+public class Teleop extends LinearOpMode {
     private Robot robot;
     private GamepadEx g1;
     private GamepadEx g2;
@@ -34,8 +34,10 @@ public class TelePop extends LinearOpMode {
 
 
         while (opModeIsActive()) {
+
             //Update everything
             robot.tPeriodic();
+
 
             if (gamepad1.left_trigger > 0.3)
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
@@ -49,6 +51,9 @@ public class TelePop extends LinearOpMode {
             }
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
+
+
+
 
             //Driving (driver 1)
             robot.getFollower().setTeleOpDrive(
