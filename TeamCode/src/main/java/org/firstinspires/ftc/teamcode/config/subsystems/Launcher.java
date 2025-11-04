@@ -168,7 +168,7 @@ public class Launcher extends SubsystemBase {
         // Clamp power between -1 and 1
 
         if (current == LauncherState.OUT) {
-            target_velocity = 4200;
+            target_velocity = 5300;
             controller.update(current_velocity, target_velocity);
             controller.updateConstants(p, d, f, l, i);
             pdfl = controller.run();

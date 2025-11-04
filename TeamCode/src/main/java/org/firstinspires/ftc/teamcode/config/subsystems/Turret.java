@@ -95,6 +95,8 @@ public class Turret extends SubsystemBase {
 
         spin.setPower(power);
 
+        telemetry.addData("turret target", target);
+
     }
 
     /*

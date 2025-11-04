@@ -48,6 +48,9 @@ public class Robot {
     public static double blueY = 72;
     public static double redY = 72;
 
+    public boolean uptakeOff = true;
+    public boolean launcherOff = true;
+
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
 
@@ -111,18 +114,23 @@ public class Robot {
 
         //Buttons
 
-        /*(
+
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             intake.setUptakeState(Intake.UptakeState.ON);
+            intake.setIntakeState(Intake.IntakeState.INTAKE);
+            launcherOff = false;
         }));
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenInactive(new InstantCommand(() -> {
-            intake.setUptakeState(Intake.UptakeState.OFF);
-        })); */
+            launcherOff = true;
+            if (uptakeOff)
+                intake.setUptakeState(Intake.UptakeState.OFF);
+        }));
 
         g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new Fire(this));
 
         g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.OUT);
+            intake.setIntakeState(Intake.IntakeState.INTAKE);
         }));
         g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.IN);

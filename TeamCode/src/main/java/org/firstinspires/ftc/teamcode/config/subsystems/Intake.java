@@ -36,7 +36,8 @@ public class Intake extends SubsystemBase {
     }
     public enum UptakeState {
         ON,
-        OFF
+        OFF,
+        BACK
     }
     public IntakeState currentIntake = IntakeState.STOP;
     public UptakeState currentUptake = UptakeState.OFF;
@@ -93,6 +94,7 @@ public class Intake extends SubsystemBase {
                 break;
             case ON: uptake.setPower(1);
                 break;
+            case BACK : uptake.setPower(-.5);
         }
     }
 

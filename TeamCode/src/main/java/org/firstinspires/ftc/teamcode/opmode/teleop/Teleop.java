@@ -21,12 +21,17 @@ public class Teleop extends LinearOpMode {
     private double scaleFactor = 1;
     @Override
     public void runOpMode() throws InterruptedException {
+        CommandScheduler.getInstance().reset();
+
         //Initialize Hardware
         robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose);
 
         //Initialize Gamepads
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
+
+        //Reset instance
+
 
         waitForStart();
         robot.tStart();
@@ -39,15 +44,23 @@ public class Teleop extends LinearOpMode {
             robot.tPeriodic();
 
 
-            if (gamepad1.left_trigger > 0.3)
+            if (gamepad1.left_trigger > 0.3) {
+                robot.uptakeOff = false;
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
-            else if (gamepad2.right_trigger > 0.3)
+                robot.intake.setUptakeState(Intake.UptakeState.BACK);
+            }
+            else if (gamepad2.right_trigger > 0.3) {
+                robot.uptakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.OUTTAKE);
-            else
+            }
+            else {
+                robot.uptakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.STOP);
+            }
 
             if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
-                robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
+                if (robot.launcherOff)
+                    robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
             }
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
