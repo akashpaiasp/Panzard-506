@@ -19,6 +19,7 @@ public class Hood extends SubsystemBase {
     //state of the subsystem
     public Servo hood;
     public double hoodDown = 1, hoodMidUp = 0.8, hoodMid = 0.5, hoodUp = 0;
+    public static double target = 0.0;
 
     public enum HoodState {
         UP,
@@ -34,6 +35,7 @@ public class Hood extends SubsystemBase {
 
         //init servos based on their name in the robot's config file
         hood = hardwareMap.get(Servo.class, "sh0");
+        target = 0.0;
     }
 
     public void setState(HoodState state) {
@@ -52,17 +54,22 @@ public class Hood extends SubsystemBase {
         telemetry.addData("Hood", hood.getPosition());
         switch (current) {
             case UP:
-                hood.setPosition(hoodUp);
+                target = hoodUp;
+                //hood.setPosition(hoodUp);
                 break;
             case MIDUP:
-                hood.setPosition(hoodMidUp);
+                target = hoodMidUp;
+                //hood.setPosition(hoodMidUp);
                 break;
             case MID:
-                hood.setPosition(hoodMid);
+                target = hoodMid;
+                //hood.setPosition(hoodMid);
                 break;
             case DOWN:
-                hood.setPosition(hoodDown);
+                target = hoodDown;
+                //hood.setPosition(hoodDown);
                 break;
         }
+        hood.setPosition(target);
     }
 }

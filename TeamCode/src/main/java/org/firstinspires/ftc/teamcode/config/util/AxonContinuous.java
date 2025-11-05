@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.seattlesolvers.solverslib.hardware.AbsoluteAnalogEncoder;
 
+import java.util.ArrayList;
+
 public class AxonContinuous {
     private CRServo c;
     private AnalogInput a;
@@ -23,6 +25,8 @@ public class AxonContinuous {
     public double lastTimeNeg = 0;
     public double lastTimePos = 0;
     public double timeThreshold = 0.05;
+    public ArrayList<Double> volts = new ArrayList<>();
+    public boolean first = true;
 
 
 
@@ -30,6 +34,11 @@ public class AxonContinuous {
         c = hwMap.get(CRServo.class, hw1);
         a = hwMap.get(AnalogInput.class, hw2);
         resetTime.reset();
+        volts.add(0.0);
+        volts.add(0.0);
+        volts.add(0.0);
+        volts.add(0.0);
+        volts.add(0.0);
     }
 
     public CRServo getC() {
@@ -41,7 +50,24 @@ public class AxonContinuous {
     }
 
     public double getVolts() {
-        return Math.round(a.getVoltage() * 100.0) / 100.0;
+        double volt = Math.round(a.getVoltage() * 100.0) / 100.0;
+        /*
+        if (first) {
+            for (double d : volts)
+                volts.add(volt);
+            first = false;
+        }
+        else {
+            volts.add(volt);
+            volts.remove(0);
+        }
+        double sum = 0;
+        for (Double d : volts)
+                sum += d;
+        return sum / volts.size(); */
+        return volt;
+
+
     }
 
     public void update() {

@@ -30,7 +30,7 @@ public class Aim extends CommandBase {
 
         double angleToTargetField = Math.toDegrees(Math.atan2(dy, dx));
 
-        double turretRelativeAngle = wrapTo180(angleToTargetField - robotHeading);
+        double turretRelativeAngle = wrapTo180(angleToTargetField - robotHeading - 90) ;
 
         turretRelativeAngle = Range.clip(turretRelativeAngle, MIN_ANGLE, MAX_ANGLE);
 

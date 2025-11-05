@@ -37,7 +37,7 @@ public class Launcher extends SubsystemBase {
     public static double l = 0.08;
     public static double i = 0.0001;
 
-    public static double target_velocity = 500;
+    public static double target_velocity = 0;
     public static double current_velocity = 0;
     public double currentPower = 0;
     public double pdfl = 0;
@@ -59,7 +59,8 @@ public class Launcher extends SubsystemBase {
     public enum LauncherState {
         IN,
         OUT,
-        STOP
+        STOP,
+        BRUH
     }
 
     public LauncherState current = LauncherState.STOP;
@@ -168,8 +169,8 @@ public class Launcher extends SubsystemBase {
         // Clamp power between -1 and 1
 
         if (current == LauncherState.OUT) {
-            target_velocity = 5300;
-            controller.update(current_velocity, target_velocity);
+            //target_velocity = 5300;
+            controller.update(current_velocity, 4500);//target_velocity);
             controller.updateConstants(p, d, f, l, i);
             pdfl = controller.run();
             power =  pdfl;
@@ -183,6 +184,10 @@ public class Launcher extends SubsystemBase {
         else if (current == LauncherState.IN){
             launcher1.setPower(-.5);
             launcher2.setPower(-.5);
+        }
+        else if (current == LauncherState.BRUH) {
+            launcher1.setPower(1);
+            launcher2.setPower(1);
         }
 
         else {

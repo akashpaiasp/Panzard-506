@@ -27,7 +27,7 @@ public class Turret extends SubsystemBase {
    // public static double turretPosConstant = 0.51;
    // public boolean first = false;
 
-    public static double p = 0.03, i = 0, d = 1, f = 0, l = 0.02;
+    public static double p = 0.03, i = 0, d = 1, f = 0, l = 0.005;
     public PDFLController controller;
 
     public static double target = 0.0;
@@ -96,6 +96,8 @@ public class Turret extends SubsystemBase {
         spin.setPower(power);
 
         telemetry.addData("turret target", target);
+        telemetry.addData("turret power", power);
+        telemetry.addData("turret volts", spin.getVolts());
 
     }
 

@@ -3,13 +3,11 @@ package org.firstinspires.ftc.teamcode.config.core;
 import static org.firstinspires.ftc.teamcode.config.core.util.Opmode.*;
 
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.button.GamepadButton;
 import com.seattlesolvers.solverslib.command.button.Trigger;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.localization.PoseTracker;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -18,7 +16,6 @@ import org.firstinspires.ftc.teamcode.config.commands.*;
 import org.firstinspires.ftc.teamcode.config.core.paths.AutoDriving;
 import org.firstinspires.ftc.teamcode.config.core.util.*;
 import org.firstinspires.ftc.teamcode.config.pedro.Constants;
-import org.firstinspires.ftc.teamcode.config.pedro.Constants.*;
 import org.firstinspires.ftc.teamcode.config.subsystems.*;
 import org.firstinspires.ftc.teamcode.config.util.Timer;
 
@@ -31,9 +28,10 @@ public class Robot {
     private SampleSubsystem sampleSubsystem;
     private Opmode op = TELEOP;
     private double speed = 1.0;
-    public static Pose autoEndPose = new Pose();
+
     public AutoDriving autoDriving;
-    public Pose p = new Pose();
+    public static Pose p = new Pose(0, 0, Math.toRadians(90));
+    public static Pose autoEndPose = p;
     public Launcher launcher;
     public Turret turret;
     public Hood hood;
@@ -42,14 +40,15 @@ public class Robot {
     public DriveTrain driveTrain;
     public Intake intake;
     public boolean robotCentric = false;
-    public static Alliance alliance = Alliance.BLUE;
+    public static Alliance alliance = Alliance.RED;
 
     public static double goalX = 72;
-    public static double blueY = 72;
-    public static double redY = 72;
+    public static double blueY = 67;
+    public static double redY = -67;
 
     public boolean uptakeOff = true;
     public boolean launcherOff = true;
+    public boolean intakeOff = true;
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
@@ -116,23 +115,31 @@ public class Robot {
 
 
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
-            intake.setUptakeState(Intake.UptakeState.ON);
-            intake.setIntakeState(Intake.IntakeState.INTAKE);
+            if (launcher.controller.done) {
+                intake.setUptakeState(Intake.UptakeState.ON);
+                intake.setIntakeState(Intake.IntakeState.INTAKE);
+            }
+            else {
+                intake.setUptakeState(Intake.UptakeState.OFF);
+                intake.setIntakeState(Intake.IntakeState.STOP);
+            }
             launcherOff = false;
+            intakeOff = false;
         }));
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenInactive(new InstantCommand(() -> {
             launcherOff = true;
             if (uptakeOff)
                 intake.setUptakeState(Intake.UptakeState.OFF);
+            intakeOff = true;
         }));
 
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new Fire(this));
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new Fire3(this));
 
         g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.OUT);
             intake.setIntakeState(Intake.IntakeState.INTAKE);
         }));
-        g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new InstantCommand(() -> {
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.IN);
         }));
 
@@ -164,7 +171,6 @@ public class Robot {
             robotCentric = true;
         }));
         g2.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::flipAlliance));
-        new Aim(this, goalX, getAlliance() == Alliance.BLUE ? blueY : redY);
 
 
 
@@ -189,6 +195,11 @@ public class Robot {
         telemetry.addData("path", follower.getCurrentPath());
         follower.update();
         telemetry.update();
+        tPeriodic();
+        turret.periodic();
+        launcher.periodic();
+        intake.periodic();
+        hood.periodic();
         autoEndPose = follower.getPose();
     }
 
@@ -196,7 +207,7 @@ public class Robot {
         telemetry.addData("Alliance", alliance);
         telemetry.update();
         g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(() -> {
-            alliance = Alliance.RED;
+            alliance = Alliance.BLUE;
         }));
     }
 

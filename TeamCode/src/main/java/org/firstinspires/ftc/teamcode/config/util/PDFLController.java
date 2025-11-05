@@ -7,11 +7,11 @@ import org.opencv.core.Mat;
 @Config
 public class PDFLController {
     //
-    private static double kP, kD, kF, kL, kI;
+    private  double kP, kD, kF, kL, kI;
 
-    private static double deadzone;
+    private  double deadzone;
 
-    private static double target;
+    private double target;
 
     private double p, d, f, l, i;
 
@@ -19,7 +19,7 @@ public class PDFLController {
 
     private double delta_time;
     private double delta_error;
-    private double risePercent = 0.01;
+    private double risePercent = 0.03;
     private int reached = 0;
 
     //Rise time = amount of time it takes to reach
@@ -35,7 +35,7 @@ public class PDFLController {
             error = 0.0,
             error2 = 0.0,
             reachedThreshold = 30,
-            settledThreshold = 50,
+            settledThreshold = 210,
             riseTime = 0,
             settlingTime = 0,
             lastRise = 0,

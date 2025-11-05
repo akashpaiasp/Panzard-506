@@ -1,12 +1,16 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.blueY;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.goalX;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.redY;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.config.commands.Aim;
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.subsystems.Intake;
@@ -24,7 +28,7 @@ public class Teleop extends LinearOpMode {
         CommandScheduler.getInstance().reset();
 
         //Initialize Hardware
-        robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose);
+        robot = new Robot(hardwareMap, telemetry, Alliance.RED, autoEndPose);
 
         //Initialize Gamepads
         g1 = new GamepadEx(gamepad1);
@@ -44,24 +48,39 @@ public class Teleop extends LinearOpMode {
             robot.tPeriodic();
 
 
-            if (gamepad1.left_trigger > 0.3) {
+            if (gamepad1.right_trigger > 0.3) {
                 robot.uptakeOff = false;
+                robot.intakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
                 robot.intake.setUptakeState(Intake.UptakeState.BACK);
             }
-            else if (gamepad2.right_trigger > 0.3) {
+            else if (gamepad1.left_trigger > 0.3) {
                 robot.uptakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.OUTTAKE);
             }
             else {
-                robot.uptakeOff = true;
-                robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                if (!gamepad2.right_bumper) {
+                    robot.uptakeOff = true;
+                    robot.intake.setUptakeState(Intake.UptakeState.OFF);
+                }
+                if (robot.intakeOff)
+                    robot.intake.setIntakeState(Intake.IntakeState.STOP);
             }
 
             if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
                 if (robot.launcherOff)
                     robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
             }
+
+            if (gamepad1.dpad_up) {
+                robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
+                robot.intakeOff = false;
+            }
+            else {
+                robot.intakeOff = true;
+            }
+
+            new Aim(robot, goalX, robot.getAlliance() == Alliance.BLUE ? blueY : redY).execute();
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
 

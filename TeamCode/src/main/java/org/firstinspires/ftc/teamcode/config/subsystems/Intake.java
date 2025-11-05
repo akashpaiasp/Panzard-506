@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
@@ -59,7 +60,7 @@ public class Intake extends SubsystemBase {
         intake = hardwareMap.get(DcMotorEx.class, "em1");
 
 
-        //intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         uptake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //init servos based on their name in the robot's config file
@@ -96,6 +97,8 @@ public class Intake extends SubsystemBase {
                 break;
             case BACK : uptake.setPower(-.5);
         }
+
+        telemetry.addData("Intake amps", intake.getCurrent(CurrentUnit.AMPS));
     }
 
     public void init() {
