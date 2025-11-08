@@ -25,7 +25,8 @@ public class Hood extends SubsystemBase {
         UP,
         MIDUP,
         MID,
-        DOWN
+        DOWN,
+        MANUAL
     }
     public HoodState current = HoodState.DOWN;
 
@@ -69,7 +70,16 @@ public class Hood extends SubsystemBase {
                 target = hoodDown;
                 //hood.setPosition(hoodDown);
                 break;
+
         }
         hood.setPosition(target);
+    }
+    public void increase() {
+        setState(HoodState.MANUAL);
+        target += .1;
+    }
+    public void decrease() {
+        setState(HoodState.MANUAL);
+        target -= .1;
     }
 }

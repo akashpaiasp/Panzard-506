@@ -18,7 +18,7 @@ public class AxonContinuous {
     private double lastVoltage = 0;
     private double threshold = 1;
     public   double partial_rotations = 0;
-    public   double full_rotations = 0;
+    public  static double full_rotations = 0;
     private double servoPower = 0;
     public Timer resetTime = new Timer();
     public double lastTimeNeg = 0;
@@ -75,7 +75,7 @@ public class AxonContinuous {
             c.setPower(servoPower);
     }
 
-    //make it so that u cant do multiple thingys within a certain time period
+    //make it so that u cant do multiple thingys within a certain time period (time threshold)
 
     public void calculate() {
         double v = getVolts();

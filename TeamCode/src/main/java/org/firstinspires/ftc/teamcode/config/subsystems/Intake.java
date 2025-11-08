@@ -102,7 +102,7 @@ public class Intake extends SubsystemBase {
                 break;
             case BACK : uptake.setPower(-.9);
                 break;
-            case SLOW: uptake.setPower(1);
+            case SLOW: uptake.setPower(.6);
                 break;
         }
 

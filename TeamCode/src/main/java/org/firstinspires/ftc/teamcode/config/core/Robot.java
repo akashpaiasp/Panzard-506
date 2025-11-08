@@ -59,6 +59,7 @@ public class Robot {
     public boolean uptakeOff = true;
     public boolean launcherOff = true;
     public boolean intakeOff = true;
+
     public static boolean auto = false;
 
 
@@ -168,12 +169,12 @@ public class Robot {
         g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::resetPose));
         g2.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::flipAlliance));
 
-        g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
+        /*g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
             Aim.fudgeFactor += 2.5;
         }));
         g1.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> {
             Aim.fudgeFactor -= 2.5;
-        }));
+        })); */
         g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
             turret.spin.full_rotations--;
         }));
@@ -183,6 +184,14 @@ public class Robot {
         g1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> {
             Aim.fudgeFactor = 0;
         }));
+        g2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> {
+            hood.increase();
+        }));
+        g2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
+            hood.decrease();
+        }));
+
+
 
 
 

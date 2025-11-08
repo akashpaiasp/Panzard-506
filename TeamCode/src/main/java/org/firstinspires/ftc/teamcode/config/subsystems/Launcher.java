@@ -170,7 +170,7 @@ public class Launcher extends SubsystemBase {
 
 
         if (current == LauncherState.OUT) {
-            target_velocity = 4100;
+            target_velocity = 4000;
             controller.update(current_velocity, target_velocity);//target_velocity);
             controller.updateConstants(p, d, f, l, i);
             pdfl = controller.run();

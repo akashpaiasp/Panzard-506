@@ -26,7 +26,7 @@ public class TwelveBallNoGate extends OpMode {
     int done = 0;
     double onThreshold = 0.5;
     double offThreshold = 0;
-    double moveThreshold = 1.7;
+    double moveThreshold = 2.2;
     boolean doneOff = false;
     double doneNum = 0;
     int doneThreshold = 4;
@@ -39,7 +39,7 @@ public class TwelveBallNoGate extends OpMode {
         switch (pathState) {
             case 00: //preload & set max power
                 robot.getFollower().setMaxPower(1);
-                robot.turret.setTargetDegrees(45);
+                robot.turret.setTargetDegrees(robot.getAlliance() == Alliance.RED ? 45 : -45);
                 robot.hood.setState(Hood.HoodState.UP);
                 setPathState(10);
                 break;
@@ -355,7 +355,7 @@ public class TwelveBallNoGate extends OpMode {
             robot.getTelemetry().addData("Path State", pathState);
             robot.getTelemetry().addData("Position", robot.getFollower().getPose().toString());
             robot.getTelemetry().update();
-            robot.auto = true;
+            Robot.auto = true;
         }
         
         @Override

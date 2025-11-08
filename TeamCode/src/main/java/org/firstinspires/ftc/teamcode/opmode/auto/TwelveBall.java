@@ -39,7 +39,7 @@ public class TwelveBall extends OpMode {
         switch (pathState) {
             case 00: //preload & set max power
                 robot.getFollower().setMaxPower(1);
-                robot.turret.setTargetDegrees(45);
+                robot.turret.setTargetDegrees(robot.getAlliance() == Alliance.RED ? 45 : -45);
                 robot.hood.setState(Hood.HoodState.UP);
                 setPathState(10);
                 break;
