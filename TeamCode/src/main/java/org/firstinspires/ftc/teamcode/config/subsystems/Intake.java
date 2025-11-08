@@ -33,12 +33,14 @@ public class Intake extends SubsystemBase {
     public enum IntakeState {
         OUTTAKE,
         INTAKE,
-        STOP
+        STOP,
+        SLOW
     }
     public enum UptakeState {
         ON,
         OFF,
-        BACK
+        BACK,
+        SLOW
     }
     public IntakeState currentIntake = IntakeState.STOP;
     public UptakeState currentUptake = UptakeState.OFF;
@@ -89,16 +91,24 @@ public class Intake extends SubsystemBase {
             break;
             case OUTTAKE: intake.setPower(-1);
             break;
+            case SLOW: intake.setPower(.95);
+                break;
         }
         switch (currentUptake) {
             case OFF : uptake.setPower(0);
                 break;
             case ON: uptake.setPower(1);
+
                 break;
-            case BACK : uptake.setPower(-.5);
+            case BACK : uptake.setPower(-.9);
+                break;
+            case SLOW: uptake.setPower(1);
+                break;
         }
 
         telemetry.addData("Intake amps", intake.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Intake power", intake.getPower());
+        telemetry.addData("Uptake power", uptake.getPower());
     }
 
     public void init() {

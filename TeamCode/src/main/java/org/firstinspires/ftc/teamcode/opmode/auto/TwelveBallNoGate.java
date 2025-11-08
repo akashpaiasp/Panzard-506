@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.config.util.Timer;
 @Autonomous
 @Config
 @Configurable
-public class TwelveBall extends OpMode {
+public class TwelveBallNoGate extends OpMode {
     private Timer pathTimer, actionTimer, opmodeTimer;
     private int pathState;
     private Robot robot;
@@ -128,7 +128,7 @@ public class TwelveBall extends OpMode {
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
                 robot.intake.setUptakeState(Intake.UptakeState.BACK);
 
-                setPathState(125);
+                setPathState(13);
                 }
 
             }
@@ -137,12 +137,14 @@ public class TwelveBall extends OpMode {
 
                 break;
 
+            /*
+
             case 125:
                 if (!robot.getFollower().isBusy()) {
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? gate(robot.getFollower()) : gateBlue(robot.getFollower()), true);
                     setPathState(13);
                 }
-                break;
+                break; */
 
             case 13:
                 if (!robot.getFollower().isBusy()) {

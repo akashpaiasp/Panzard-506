@@ -18,7 +18,7 @@ public class Hood extends SubsystemBase {
 
     //state of the subsystem
     public Servo hood;
-    public double hoodDown = 1, hoodMidUp = 0.8, hoodMid = 0.5, hoodUp = 0;
+    public double hoodDown = 1, hoodMid = 0.75, hoodMidUp = 0.45, hoodUp = 0.25;
     public static double target = 0.0;
 
     public enum HoodState {

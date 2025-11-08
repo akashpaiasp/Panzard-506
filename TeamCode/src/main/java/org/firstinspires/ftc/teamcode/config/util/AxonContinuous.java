@@ -13,20 +13,20 @@ public class AxonContinuous {
     private CRServo c;
     private AnalogInput a;
 
-    private double numRotations = 0;
+    public  double numRotations = 0;
     private boolean forward = true;
     private double lastVoltage = 0;
     private double threshold = 1;
-    private double partial_rotations = 0;
-    private double full_rotations = 0;
-    private double last_rotations = 0;
+    public   double partial_rotations = 0;
+    public   double full_rotations = 0;
     private double servoPower = 0;
     public Timer resetTime = new Timer();
     public double lastTimeNeg = 0;
     public double lastTimePos = 0;
-    public double timeThreshold = 0.05;
+    public static double timeThreshold = 0.05;
     public ArrayList<Double> volts = new ArrayList<>();
     public boolean first = true;
+    public double volt;
 
 
 
@@ -34,11 +34,6 @@ public class AxonContinuous {
         c = hwMap.get(CRServo.class, hw1);
         a = hwMap.get(AnalogInput.class, hw2);
         resetTime.reset();
-        volts.add(0.0);
-        volts.add(0.0);
-        volts.add(0.0);
-        volts.add(0.0);
-        volts.add(0.0);
     }
 
     public CRServo getC() {
@@ -50,7 +45,8 @@ public class AxonContinuous {
     }
 
     public double getVolts() {
-        double volt = Math.round(a.getVoltage() * 100.0) / 100.0;
+        //if (a.getVoltage() < 3.2 && a.getVoltage() > 0.1)
+            volt = Math.round(a.getVoltage() * 100.0) / 100.0;
         /*
         if (first) {
             for (double d : volts)

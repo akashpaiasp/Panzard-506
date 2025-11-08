@@ -21,7 +21,8 @@ public class Turret extends SubsystemBase {
     //Telemetry = text that is printed on the driver station while the robot is running
     public double power = 0;
 
-    public static double offset = -6.9;
+    public static double offset = -41;
+    //61.7, 14.9
     //public static boolean powerMode = false;
 
    // public static double turretPosConstant = 0.51;

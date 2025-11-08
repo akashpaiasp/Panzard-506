@@ -168,9 +168,10 @@ public class Launcher extends SubsystemBase {
 
         // Clamp power between -1 and 1
 
+
         if (current == LauncherState.OUT) {
-            //target_velocity = 5300;
-            controller.update(current_velocity, 4500);//target_velocity);
+            target_velocity = 4100;
+            controller.update(current_velocity, target_velocity);//target_velocity);
             controller.updateConstants(p, d, f, l, i);
             pdfl = controller.run();
             power =  pdfl;
@@ -199,6 +200,7 @@ public class Launcher extends SubsystemBase {
         telemetry.addData("Velocity", current_velocity);
         telemetry.addData("Power", launcher1.getPower());
         telemetry.addData("State", current.toString());
+        telemetry.addData("Done", controller.done);
 
 
     }

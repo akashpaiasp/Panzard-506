@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.config.core.Robot.blueY;
 import static org.firstinspires.ftc.teamcode.config.core.Robot.goalX;
 import static org.firstinspires.ftc.teamcode.config.core.Robot.redY;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -15,6 +16,7 @@ import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.config.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.config.subsystems.MyLED;
 
 @TeleOp (name = "TelePop")
 
@@ -29,6 +31,7 @@ public class Teleop extends LinearOpMode {
 
         //Initialize Hardware
         robot = new Robot(hardwareMap, telemetry, Alliance.RED, autoEndPose);
+        Robot.auto = false;
 
         //Initialize Gamepads
         g1 = new GamepadEx(gamepad1);
@@ -55,21 +58,24 @@ public class Teleop extends LinearOpMode {
                 robot.intake.setUptakeState(Intake.UptakeState.BACK);
             }
             else if (gamepad1.left_trigger > 0.3) {
-                robot.uptakeOff = true;
+                //robot.uptakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.OUTTAKE);
             }
             else {
                 if (!gamepad2.right_bumper) {
-                    robot.uptakeOff = true;
-                    robot.intake.setUptakeState(Intake.UptakeState.OFF);
+                    //robot.uptakeOff = true;
+                    //if (robot.uptakeOff)
+                        robot.intake.setUptakeState(Intake.UptakeState.OFF);
                 }
                 if (robot.intakeOff)
                     robot.intake.setIntakeState(Intake.IntakeState.STOP);
             }
 
             if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
-                if (robot.launcherOff)
+                if (robot.launcherOff) {
                     robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
+                    //robot.led.setState(MyLED.State.RED);
+                }
             }
 
             if (gamepad1.dpad_up) {
@@ -80,7 +86,8 @@ public class Teleop extends LinearOpMode {
                 robot.intakeOff = true;
             }
 
-            new Aim(robot, goalX, robot.getAlliance() == Alliance.BLUE ? blueY : redY).execute();
+            if(!gamepad1.right_bumper)
+                new Aim(robot, goalX, robot.getAlliance() == Alliance.BLUE ? blueY : redY).execute();
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
 

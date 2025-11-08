@@ -3,20 +3,21 @@ package org.firstinspires.ftc.teamcode.config.subsystems;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.LED;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+
 /*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
 */
-public class LED extends SubsystemBase {
+public class MyLED extends SubsystemBase {
     //Telemetry = text that is printed on the driver station while the robot is running
     private MultipleTelemetry telemetry;
 
     //state of the subsystem
-    private enum State {
+    public enum State {
         RED,
         GREEN,
         YELLOW,
@@ -26,9 +27,9 @@ public class LED extends SubsystemBase {
     }
     private State currentState = State.OFF;
 
-    public LED red, green;
+    private LED red, green;
 
-    public LED(HardwareMap hardwareMap, Telemetry telemetry) {
+    public MyLED(HardwareMap hardwareMap, Telemetry telemetry) {
         //init telemetry
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
@@ -38,17 +39,27 @@ public class LED extends SubsystemBase {
     }
 
     //Call this method to open/close the servos
-    private void setState(State state) {
+    public void setState(State state) {
         currentState = state;
 
         //sets servo positions based on the state
-        if (state == State.OFF) {
-            //left.setPosition(0);
-            //right.setPosition(0);
-        }
-        else {
-            //left.setPosition(1);
-            //right.setPosition(1);
+        switch (state) {
+            case OFF:
+                green.off();
+                red.off();
+                break;
+            case GREEN:
+                green.on();
+                red.off();
+                break;
+            case RED:
+                green.off();
+                red.on();
+                break;
+            default:
+                green.on();
+                red.on();
+                break;
         }
     }
 
@@ -61,6 +72,8 @@ public class LED extends SubsystemBase {
     /*Periodic method gets run in a loop during auto and teleop.
     The telemetry gets updated constantly so you can see the status of the subsystems */
     public void periodic() {
-        telemetry.addData("SampleSubsytem", getState());
+        telemetry.addData("LED", getState());
+
+
     }
 }

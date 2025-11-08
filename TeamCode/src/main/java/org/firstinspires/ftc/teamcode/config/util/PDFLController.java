@@ -28,7 +28,7 @@ public class PDFLController {
     //Timer to track rise time
     private Timer riseTimer = new Timer();
     private boolean settled = true;
-    public boolean done = false;
+    public boolean done = true;
     private double
             tot_error = 0.0,
             prev_error = 0.0,
