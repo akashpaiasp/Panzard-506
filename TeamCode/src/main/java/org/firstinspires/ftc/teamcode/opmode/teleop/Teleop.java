@@ -30,7 +30,7 @@ public class Teleop extends LinearOpMode {
         CommandScheduler.getInstance().reset();
 
         //Initialize Hardware
-        robot = new Robot(hardwareMap, telemetry, Alliance.RED, autoEndPose);
+        robot = new Robot(hardwareMap, telemetry, Robot.alliance, autoEndPose);
         Robot.auto = false;
 
         //Initialize Gamepads

@@ -88,11 +88,9 @@ public class Robot {
         //aInitLoop = false;
        // telemetry.addData("Start Pose", p);
         init();
-        if (!auto) {
             turret.spin.numRotations = 0;
             turret.spin.partial_rotations = 0;
             turret.spin.full_rotations = 0;
-        }
     }
 
     //Teleop Controls here
@@ -221,8 +219,8 @@ public class Robot {
         launcher.periodic();
         intake.periodic();
         hood.periodic();
-        autoEndPose = follower.getPose().copy();
-        autoEndPose = new Pose(follower.getPose().getX(), follower.getPose().getY(), alliance == Alliance.RED ? follower.getHeading() - 90 : follower.getHeading() + 90);
+        //autoEndPose = follower.getPose().copy();
+        autoEndPose = new Pose(follower.getPose().getX(), follower.getPose().getY(), alliance == Alliance.RED ? follower.getHeading() + Math.toRadians(90) : follower.getHeading() - Math.toRadians(90));
     }
 
     public void aInitLoop(GamepadEx g1) {
@@ -288,6 +286,7 @@ public class Robot {
     }
 
     public void resetPose() {
+
         double x, y, heading;
         Pose f = follower.getPose();
         if (f.getHeading() > Math.toRadians(45)) {
@@ -315,7 +314,8 @@ public class Robot {
                 x = cornerRedBack.getX();
                 y = cornerRedBack.getY();
             }
-        follower.setPose(new Pose(x, y, heading));
+        //follower.setPose(new Pose(x, y, heading));
+        follower.setPose(new Pose(0, 0, follower.getHeading()));
     }
 
 }

@@ -25,7 +25,7 @@ public class TwelveBall extends OpMode {
     private Robot robot;
     int done = 0;
     double onThreshold = 0.5;
-    double offThreshold = 0;
+    double offThreshold = 0.2;
     double moveThreshold = 1.7;
     boolean doneOff = false;
     double doneNum = 0;
@@ -122,7 +122,7 @@ public class TwelveBall extends OpMode {
 
             case 12: {
                 doneNum = 0;
-                if (pathTimer.getElapsedTimeSeconds() > 0.3) {
+                if (pathTimer.getElapsedTimeSeconds() > offThreshold) {
                 robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                 robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? pickup1(robot.getFollower()) : pickup1Blue(robot.getFollower()), true);
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
@@ -189,7 +189,7 @@ public class TwelveBall extends OpMode {
             
             case 19:
                 doneNum = 0;
-                if (pathTimer.getElapsedTimeSeconds() > 0.3) {
+                if (pathTimer.getElapsedTimeSeconds() > offThreshold) {
                     robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? strafe1(robot.getFollower()) : strafe1Blue(robot.getFollower()), true);
                     robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
@@ -251,7 +251,7 @@ public class TwelveBall extends OpMode {
 
             case 27:
                 doneNum = 0;
-                if (pathTimer.getElapsedTimeSeconds() > 0.3) {
+                if (pathTimer.getElapsedTimeSeconds() > offThreshold) {
                     robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? strafe2(robot.getFollower()) : strafe2Blue(robot.getFollower()), true);
                     robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
@@ -313,16 +313,15 @@ public class TwelveBall extends OpMode {
 
             case 35:
                 doneNum = 0;
-                if (!robot.launcher.controller.done || pathTimer.getElapsedTimeSeconds() > 1) {
                     if (pathTimer.getElapsedTimeSeconds() > offThreshold) {
                         robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                         robot.intake.setIntakeState(Intake.IntakeState.STOP);
                         robot.intake.setUptakeState(Intake.UptakeState.OFF);
                         robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ?move(robot.getFollower()) : moveBlue(robot.getFollower()), true);
                         setPathState(36);
+                        robot.turret.setTargetDegrees(0);
                     }
                     break;
-                }
 
             case 36:
                 break;

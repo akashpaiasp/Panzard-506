@@ -26,15 +26,16 @@ public class Aim extends CommandBase {
          * Calculates the turret angle relative to the robot's front (degrees).
          * Clamps to [-90°, +90°].
          */
-        double dx = r.getAlliance() == Alliance.RED ? (targetX + r.getFollower().getPose().getX()) : (targetX - r.getFollower().getPose().getX());
-        double dy = r.getAlliance() == Alliance.RED ? (targetY - r.getFollower().getPose().getY()) : (targetY + r.getFollower().getPose().getY());
+        double dx = r.getAlliance() == Alliance.RED ? (targetX - r.getFollower().getPose().getX()) : (targetX - r.getFollower().getPose().getX());
+        double dy = r.getAlliance() == Alliance.RED ? (targetY - r.getFollower().getPose().getY()) : (targetY - r.getFollower().getPose().getY());
         double robotHeading = Math.toDegrees(r.getFollower().getPose().getHeading());
 
         double angleToTargetField = Math.toDegrees(Math.atan2(dy, dx));
 
-        double turretRelativeAngle = wrapTo180(angleToTargetField - robotHeading + 90 + fudgeFactor) ;
+        double turretRelativeAngle = wrapTo180(Robot.alliance == Alliance.RED ? (angleToTargetField - robotHeading + fudgeFactor) : (angleToTargetField - robotHeading + fudgeFactor - 90) ) ;
 
         turretRelativeAngle = Range.clip(turretRelativeAngle, MIN_ANGLE, MAX_ANGLE);
+        turretRelativeAngle = 0;
 
         r.turret.setTargetDegrees(turretRelativeAngle);
 
