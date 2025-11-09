@@ -1,32 +1,44 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
 import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.blueY;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.goalX;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.redY;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.config.commands.Aim;
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.config.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.config.subsystems.MyLED;
 
-@TeleOp
+@TeleOp (name = "TelePop")
 
-public class TelePop extends LinearOpMode {
+public class Teleop extends LinearOpMode {
     private Robot robot;
     private GamepadEx g1;
     private GamepadEx g2;
     private double scaleFactor = 1;
     @Override
     public void runOpMode() throws InterruptedException {
+        CommandScheduler.getInstance().reset();
+
         //Initialize Hardware
-        robot = new Robot(hardwareMap, telemetry, Alliance.BLUE, autoEndPose);
+        robot = new Robot(hardwareMap, telemetry, Robot.alliance, autoEndPose);
+        Robot.auto = false;
 
         //Initialize Gamepads
         g1 = new GamepadEx(gamepad1);
         g2 = new GamepadEx(gamepad2);
+
+        //Reset instance
+
 
         waitForStart();
         robot.tStart();
@@ -34,21 +46,53 @@ public class TelePop extends LinearOpMode {
 
 
         while (opModeIsActive()) {
+
             //Update everything
             robot.tPeriodic();
 
-            if (gamepad1.left_trigger > 0.3)
+
+            if (gamepad1.right_trigger > 0.3) {
+                robot.uptakeOff = false;
+                robot.intakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
-            else if (gamepad2.right_trigger > 0.3)
+                robot.intake.setUptakeState(Intake.UptakeState.BACK);
+            }
+            else if (gamepad1.left_trigger > 0.3) {
+                //robot.uptakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.OUTTAKE);
-            else
-                robot.intake.setIntakeState(Intake.IntakeState.STOP);
+            }
+            else {
+                if (!gamepad2.right_bumper) {
+                    //robot.uptakeOff = true;
+                    //if (robot.uptakeOff)
+                        robot.intake.setUptakeState(Intake.UptakeState.OFF);
+                }
+                if (robot.intakeOff)
+                    robot.intake.setIntakeState(Intake.IntakeState.STOP);
+            }
 
             if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
-                robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
+                if (robot.launcherOff) {
+                    robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
+                    //robot.led.setState(MyLED.State.RED);
+                }
             }
+
+            if (gamepad1.dpad_up) {
+                robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
+                robot.intakeOff = false;
+            }
+            else {
+                robot.intakeOff = true;
+            }
+
+            if(!gamepad1.right_bumper)
+                new Aim(robot, goalX, robot.getAlliance() == Alliance.BLUE ? blueY : redY).execute();
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
+
+
+
 
             //Driving (driver 1)
             robot.getFollower().setTeleOpDrive(

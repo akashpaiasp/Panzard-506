@@ -27,9 +27,10 @@ public class Constants {
             .centripetalScaling(0.0005)
             .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.02))
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.07, 0.06))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.1, 0, 0, 0.6, 0))
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.007, 0.003, 0.00025, 0.6, 0.0001))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.13, 0, 0.01, 0.02))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.05, 0.01));
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(2, 0, 0.05, 0.01))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.005, 0.0001, 0.000005, 0.6, 0.01));
 
     //Constants relating to the 4 drive motors
     public static MecanumConstants driveConstants = new MecanumConstants()
@@ -63,7 +64,7 @@ public class Constants {
     public static PathConstraints pathConstraints = new PathConstraints(
             0.995,
             500,
-            1,
+            .9,
             1
     );
 

@@ -28,16 +28,16 @@ public class Launcher extends SubsystemBase {
 
     public DcMotorEx launcher2;
 
-    private PDFLController controller;
+    public PDFLController controller;
 
     //pdfl values tuned in FTC Dashboard
-    public static double p = 0.005;
+    public static double p = 0.001;
     public static double d = 0.01;
     public static double f = 0;
     public static double l = 0.08;
-    public static double i = 0.001;
+    public static double i = 0.0001;
 
-    public static double target_velocity = 500;
+    public static double target_velocity = 0;
     public static double current_velocity = 0;
     public double currentPower = 0;
     public double pdfl = 0;
@@ -59,7 +59,8 @@ public class Launcher extends SubsystemBase {
     public enum LauncherState {
         IN,
         OUT,
-        STOP
+        STOP,
+        BRUH
     }
 
     public LauncherState current = LauncherState.STOP;
@@ -149,6 +150,8 @@ public class Launcher extends SubsystemBase {
 
         telemetry.addData("Total Error", controller.getTot_error());
 
+        telemetry.addData("Done", controller.done);
+
 
 
         telemetry.update();
@@ -164,31 +167,40 @@ public class Launcher extends SubsystemBase {
 
 
         // Clamp power between -1 and 1
-        //power = Math.max(-1, Math.min(1, power));
+
+
         if (current == LauncherState.OUT) {
-            //launcher1.setPower(power);
-            //launcher2.setPower(power);
-            launcher1.setPower(1);
-            launcher2.setPower(1);
+            target_velocity = 4000;
+            controller.update(current_velocity, target_velocity);//target_velocity);
+            controller.updateConstants(p, d, f, l, i);
+            pdfl = controller.run();
+            power =  pdfl;
+            power = Range.clip(power, -1, 1);
+            launcher1.setPower(power);
+            launcher2.setPower(power);
+
+            //launcher1.setPower(1);
+            //launcher2.setPower(1);
         }
         else if (current == LauncherState.IN){
             launcher1.setPower(-.5);
             launcher2.setPower(-.5);
         }
+        else if (current == LauncherState.BRUH) {
+            launcher1.setPower(1);
+            launcher2.setPower(1);
+        }
 
         else {
-            /*target_velocity = 0;
-            controller.update(current_velocity, target_velocity);
-            pdfl = controller.run();
-            power =  pdfl;
-            //power = test1;
-            power = Range.clip(power, -1, 1); */
+            target_velocity = 0;
             launcher1.setPower(0);
             launcher2.setPower(0);
         }
 
         telemetry.addData("Velocity", current_velocity);
         telemetry.addData("Power", launcher1.getPower());
+        telemetry.addData("State", current.toString());
+        telemetry.addData("Done", controller.done);
 
 
     }
@@ -203,6 +215,8 @@ public class Launcher extends SubsystemBase {
         launcher1.setPower(0);
         launcher2.setPower(0);
     }
+
+
     //.1 = 140
     //.2 = 380
     //.3 = 640

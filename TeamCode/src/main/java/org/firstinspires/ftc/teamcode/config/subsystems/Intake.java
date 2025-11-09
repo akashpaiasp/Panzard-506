@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 /*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
@@ -32,11 +33,14 @@ public class Intake extends SubsystemBase {
     public enum IntakeState {
         OUTTAKE,
         INTAKE,
-        STOP
+        STOP,
+        SLOW
     }
     public enum UptakeState {
         ON,
-        OFF
+        OFF,
+        BACK,
+        SLOW
     }
     public IntakeState currentIntake = IntakeState.STOP;
     public UptakeState currentUptake = UptakeState.OFF;
@@ -58,7 +62,7 @@ public class Intake extends SubsystemBase {
         intake = hardwareMap.get(DcMotorEx.class, "em1");
 
 
-        //intake.setDirection(DcMotorSimple.Direction.REVERSE);
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
         uptake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //init servos based on their name in the robot's config file
@@ -87,13 +91,24 @@ public class Intake extends SubsystemBase {
             break;
             case OUTTAKE: intake.setPower(-1);
             break;
+            case SLOW: intake.setPower(.95);
+                break;
         }
         switch (currentUptake) {
             case OFF : uptake.setPower(0);
                 break;
             case ON: uptake.setPower(1);
+
+                break;
+            case BACK : uptake.setPower(-.9);
+                break;
+            case SLOW: uptake.setPower(.6);
                 break;
         }
+
+        telemetry.addData("Intake amps", intake.getCurrent(CurrentUnit.AMPS));
+        telemetry.addData("Intake power", intake.getPower());
+        telemetry.addData("Uptake power", uptake.getPower());
     }
 
     public void init() {

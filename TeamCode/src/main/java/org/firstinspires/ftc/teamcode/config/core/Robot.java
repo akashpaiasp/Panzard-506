@@ -2,14 +2,13 @@ package org.firstinspires.ftc.teamcode.config.core;
 
 import static org.firstinspires.ftc.teamcode.config.core.util.Opmode.*;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.button.GamepadButton;
 import com.seattlesolvers.solverslib.command.button.Trigger;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.localization.PoseTracker;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -18,11 +17,13 @@ import org.firstinspires.ftc.teamcode.config.commands.*;
 import org.firstinspires.ftc.teamcode.config.core.paths.AutoDriving;
 import org.firstinspires.ftc.teamcode.config.core.util.*;
 import org.firstinspires.ftc.teamcode.config.pedro.Constants;
-import org.firstinspires.ftc.teamcode.config.pedro.Constants.*;
 import org.firstinspires.ftc.teamcode.config.subsystems.*;
+import org.firstinspires.ftc.teamcode.config.util.AxonContinuous;
 import org.firstinspires.ftc.teamcode.config.util.Timer;
 
 
+
+@Config
 public class Robot {
     public Timer specTimer;
     private HardwareMap hw;
@@ -31,72 +32,71 @@ public class Robot {
     private SampleSubsystem sampleSubsystem;
     private Opmode op = TELEOP;
     private double speed = 1.0;
-    public static Pose autoEndPose = new Pose();
+
     public AutoDriving autoDriving;
-    public Pose p = new Pose();
+    public static Pose p = new Pose(0, 0, Math.toRadians(90));
+    public static Pose autoEndPose = p;
     public Launcher launcher;
     public Turret turret;
     public Hood hood;
+    public MyLED led;
     public boolean slowMode;
     public Limelight limelight;
     public DriveTrain driveTrain;
     public Intake intake;
     public boolean robotCentric = false;
-    public static Alliance alliance = Alliance.BLUE;
+    public static Alliance alliance = Alliance.RED;
+
+    public static double goalX = 43;
+    public static double blueY = 43;
+    public static double redY = -43;
+
+    //public static Pose cornerBlueFront = new Pose(-72, -72);
+    public static Pose cornerBlueBack = new Pose(-61.9, -65.9);
+   // public static Pose cornerRedFront = new Pose(-72, -72);
+    public static Pose cornerRedBack = new Pose(61.9, -65.9);
+
+    public boolean uptakeOff = true;
+    public boolean launcherOff = true;
+    public boolean intakeOff = true;
+
+    public static boolean auto = false;
+
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
 
-    //For TeleOp
-    public Robot(HardwareMap hw, Telemetry telemetry, Alliance alliance) {
-        this.op = TELEOP;
-        this.hw = hw;
-        this.telemetry = telemetry;
-        this.alliance = alliance;
-
-        follower = Constants.createFollower(hw);
-        follower.setStartingPose(autoEndPose);
-        follower.update();
-
-        autoDriving = new AutoDriving(follower, this.telemetry);
-
-        launcher = new Launcher(hw, telemetry);
-        turret = new Turret(hw, telemetry);
-        //limelight = new Limelight(hw, telemetry);
-        hood = new Hood(hw, telemetry);
-        driveTrain = new DriveTrain(hw, telemetry);
-        intake = new Intake(hw, telemetry);
-
-        init();
-
-
-    }
-
-    //For Auto
     public Robot(HardwareMap hw, Telemetry telemetry, Alliance alliance, Pose startPose) {
         this.op = AUTONOMOUS;
         this.hw = hw;
         this.telemetry = telemetry;
-        this.alliance = alliance;
-        this.p = startPose.copy();
+        Robot.alliance = alliance;
+        p = startPose.copy();
 
         follower = Constants.createFollower(hw);
         follower.setStartingPose(startPose);
+        follower.update();
 
         launcher = new Launcher(hw, telemetry);
         turret = new Turret(hw, telemetry);
         hood = new Hood(hw, telemetry);
         driveTrain = new DriveTrain(hw, telemetry);
         intake = new Intake(hw, telemetry);
+        led = new MyLED(hw, telemetry);
         //limelight = new Limelight(hw, telemetry);
 
         //aInitLoop = false;
        // telemetry.addData("Start Pose", p);
         init();
+            turret.spin.numRotations = 0;
+            turret.spin.partial_rotations = 0;
+            turret.spin.full_rotations = 0;
     }
 
     //Teleop Controls here
     public void dualControls(GamepadEx g1, GamepadEx g2) {
+
+
         // Left and Right triggers on both controllers
         Trigger lTG1 = new Trigger(() -> g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER ) > 0.3);
         Trigger lTG2 = new Trigger(() -> g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER ) > 0.3);
@@ -104,22 +104,39 @@ public class Robot {
         Trigger rTG2 = new Trigger(() -> g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER ) > 0.3);
 
         //Buttons
+
+
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
-            intake.setUptakeState(Intake.UptakeState.ON);
+            if (launcher.controller.done) {
+                intake.setUptakeState(Intake.UptakeState.SLOW);
+                intake.setIntakeState(Intake.IntakeState.SLOW);
+                led.setState(MyLED.State.GREEN);
+            }
+            else {
+                intake.setUptakeState(Intake.UptakeState.OFF);
+                intake.setIntakeState(Intake.IntakeState.STOP);
+                led.setState(MyLED.State.YELLOW);
+            }
+            launcherOff = false;
+            intakeOff = false;
+            uptakeOff = false;
+
+
         }));
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenInactive(new InstantCommand(() -> {
-            intake.setUptakeState(Intake.UptakeState.OFF);
+            launcherOff = true;
+            intakeOff = true;
+            uptakeOff = true;
         }));
+
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new Fire3(this));
 
         g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.OUT);
+            //intake.setIntakeState(Intake.IntakeState.INTAKE);
         }));
         g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.IN);
-        }));
-        g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
-                .and(g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).whenInactive(new InstantCommand(() -> {
-            launcher.setLauncherState(Launcher.LauncherState.STOP);
         }));
 
         g2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> {
@@ -146,9 +163,33 @@ public class Robot {
             intake.setIntakeState(Intake.IntakeState.STOP);
         })); */
 
-        g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(() -> {
-            robotCentric = true;
+        //robotCentric = true;
+        g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::resetPose));
+        g2.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::flipAlliance));
+
+        /*g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
+            Aim.fudgeFactor += 2.5;
         }));
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> {
+            Aim.fudgeFactor -= 2.5;
+        })); */
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
+            turret.spin.full_rotations--;
+        }));
+        g1.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> {
+            turret.spin.full_rotations++;
+        }));
+        g1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> {
+            Aim.fudgeFactor = 0;
+        }));
+        g2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> {
+            hood.increase();
+        }));
+        g2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
+            hood.decrease();
+        }));
+
+
 
 
 
@@ -173,25 +214,34 @@ public class Robot {
         telemetry.addData("path", follower.getCurrentPath());
         follower.update();
         telemetry.update();
-        autoEndPose = follower.getPose();
+        tPeriodic();
+        turret.periodic();
+        launcher.periodic();
+        intake.periodic();
+        hood.periodic();
+        //autoEndPose = follower.getPose().copy();
+        autoEndPose = new Pose(follower.getPose().getX(), follower.getPose().getY(), alliance == Alliance.RED ? follower.getHeading() + Math.toRadians(90) : follower.getHeading() - Math.toRadians(90));
     }
 
     public void aInitLoop(GamepadEx g1) {
         telemetry.addData("Alliance", alliance);
         telemetry.update();
         g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(() -> {
-            alliance = Alliance.RED;
+            alliance = Alliance.BLUE;
         }));
     }
 
     public void tPeriodic() {
         follower.update();
+        telemetry.update();
+        /*
         //autoDriving.update();
         telemetry.update();
         turret.periodic();
         launcher.periodic();
         intake.periodic();
         hood.periodic();
+        */
 
     }
 
@@ -228,6 +278,44 @@ public class Robot {
 
     public Follower getFollower() {
         return follower;
+    }
+
+    public void flipAlliance() {
+        if (alliance == Alliance.BLUE) setAlliance(Alliance.RED);
+        else setAlliance(Alliance.BLUE);
+    }
+
+    public void resetPose() {
+
+        double x, y, heading;
+        Pose f = follower.getPose();
+        if (f.getHeading() > Math.toRadians(45)) {
+            if (f.getHeading() > Math.toRadians(135))
+                heading = Math.toRadians(180);
+            else
+                heading = Math.toRadians(90);
+        }
+        else {
+            if (f.getHeading() < Math.toRadians(-45)) {
+                if (f.getHeading() < -135)
+                    heading = Math.toRadians(-180);
+                else
+                    heading = Math.toRadians(-90);
+            }
+            else
+                heading = 0;
+        }
+        if (f.getX() < 0) {
+                x = cornerBlueBack.getX();
+                y = cornerBlueBack.getY();
+            }
+
+        else {
+                x = cornerRedBack.getX();
+                y = cornerRedBack.getY();
+            }
+        //follower.setPose(new Pose(x, y, heading));
+        follower.setPose(new Pose(0, 0, follower.getHeading()));
     }
 
 }
