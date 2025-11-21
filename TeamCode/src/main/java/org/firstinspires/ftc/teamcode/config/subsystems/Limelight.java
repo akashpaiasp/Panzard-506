@@ -4,6 +4,9 @@ package org.firstinspires.ftc.teamcode.config.subsystems;
 
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTable;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -32,7 +35,14 @@ public class Limelight extends SubsystemBase {
         //links to limelight - need to make sure it connect properly
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        try {
+            limelight = new Limelight3A("172.29.0.1"); //may need changing?
+        } catch (Exception e) {
+            telemetry.addLine("ERROR: Limelight not detected!");
+            telemetry.update();
+            sleep(3000);
+            return;  // prevent opmode from running
+        }
 
         //default pipeline - can be changed later
         setPipeline(0);
