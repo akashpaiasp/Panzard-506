@@ -11,6 +11,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.config.core.Robot;
+import org.firstinspires.ftc.teamcode.config.util.logging.LogType;
+import org.firstinspires.ftc.teamcode.config.util.logging.Logger;
 import org.firstinspires.ftc.teamcode.config.util.PDFLController;
 import org.firstinspires.ftc.teamcode.config.util.Timer;
 
@@ -37,8 +40,19 @@ public class Launcher extends SubsystemBase {
     public static double l = 0.08;
     public static double i = 0.0001;
 
+    public static double p2 = p / 2.5;
+    public static double d2 = d / 2.5;
+    public static double f2 = 0;
+    public static double l2 = 0.08;
+    public static double i2 = 0;
+
+
     public static double target_velocity = 0;
-    public static double current_velocity = 0;
+    public static double tele_target = 4000;
+    public static boolean powerMode = false;
+    public static boolean pid1 = true;
+    public double current_velocity = 0;
+    public double prev_velocity = 0;
     public double currentPower = 0;
     public double pdfl = 0;
 
@@ -46,6 +60,7 @@ public class Launcher extends SubsystemBase {
 
     public static double test1 = 0;
     public static double test2 = 0;
+    public static boolean shoot = false;
 
     public long lastUpdateTime = 0;
     private Timer timer = new Timer();
@@ -55,21 +70,35 @@ public class Launcher extends SubsystemBase {
     private int last_position = 0;
     private int curr_position = 0;
     private int delta_pos = 0;
+    private boolean ramped = false;
+    private int numDone = 0;
+
+    public static double boostTime = 0.14;
+    public static double RECOVERY_THRESHOLD = 100;
+    public static double DROP_THRESHOLD = .1;
+    public static double FALL_THRESHOLD = .83;
+
+    private boolean inBoost = false;
+    private boolean inAggressive = false;
+    boolean ready = false;
+
+
 
     public enum LauncherState {
         IN,
         OUT,
         STOP,
-        BRUH
     }
 
     public LauncherState current = LauncherState.STOP;
+    public HardwareMap hw;
 
 
 
     public Launcher(HardwareMap hardwareMap, Telemetry telemetry) {
         //init telemetry
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        this.hw = hardwareMap;
 
         //init servos based on their name in the robot's config file
         launcher1 = hardwareMap.get(DcMotorEx.class, "em0");
@@ -77,6 +106,8 @@ public class Launcher extends SubsystemBase {
         launcher2.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        launcher2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launcher1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         controller = new PDFLController(p, d, f, l, i);
         controller.reset();
@@ -95,10 +126,10 @@ public class Launcher extends SubsystemBase {
 
 
         curr_position = launcher1.getCurrentPosition();
-        curr_time = timer.getElapsedTime();
+        //curr_time = timer.getElapsedTime();
 
-        delta_time = (timer.getElapsedTime() - last_time) / 1000.0;
-        delta_pos = curr_position - last_position;
+        //delta_time = (timer.getElapsedTime() - last_time) / 1000.0;
+        //delta_pos = curr_position - last_position;
         current_velocity = tickstoRPM(launcher1.getVelocity());//tickstoRPM((double)(delta_pos) / delta_time);
 
 
@@ -111,13 +142,20 @@ public class Launcher extends SubsystemBase {
 
         // Clamp power between -1 and 1
         //power = Math.max(-1, Math.min(1, power));
-
-        launcher1.setPower(power);
-        launcher2.setPower(power);
-
-        controller.updateConstants(p, d, f, l, i);
-
+        if (!powerMode) {
+            launcher1.setPower(power);
+            launcher2.setPower(power);
+        }
+        else {
+            launcher1.setPower(test1);
+            launcher2.setPower(test1);
+        }
+        if (pid1)
+            controller.updateConstants(p, d, f, l, i);
+        else
+            controller.updateConstants(p2, d2, f2, l2, i2);
         telemetry.addData("Launcher1 Velocity", current_velocity);
+        telemetry.addData("Launcher2 Velocity", tickstoRPM(launcher2.getVelocity()));
 
         telemetry.addData("pdfl", pdfl);
 
@@ -155,6 +193,7 @@ public class Launcher extends SubsystemBase {
 
 
         telemetry.update();
+        log();
 
     }
 
@@ -162,47 +201,113 @@ public class Launcher extends SubsystemBase {
         current = state;
     }
 
+
     public void periodic() {
-        current_velocity = tickstoRPM(launcher1.getVelocity());
+        //if (Robot.logData) log();
+        if (current == LauncherState.OUT)
+            target_velocity = tele_target;
+        else if (current == LauncherState.STOP)
+            target_velocity = 0;
+        if(current != LauncherState.STOP)
+            updateShooter();
+        else {
+            launcher1.setPower(0);
+            launcher2.setPower(0);
+        }
+
 
 
         // Clamp power between -1 and 1
 
 
-        if (current == LauncherState.OUT) {
-            target_velocity = 4000;
-            controller.update(current_velocity, target_velocity);//target_velocity);
-            controller.updateConstants(p, d, f, l, i);
-            pdfl = controller.run();
-            power =  pdfl;
-            power = Range.clip(power, -1, 1);
-            launcher1.setPower(power);
-            launcher2.setPower(power);
 
-            //launcher1.setPower(1);
-            //launcher2.setPower(1);
-        }
-        else if (current == LauncherState.IN){
-            launcher1.setPower(-.5);
-            launcher2.setPower(-.5);
-        }
-        else if (current == LauncherState.BRUH) {
-            launcher1.setPower(1);
-            launcher2.setPower(1);
-        }
-
-        else {
-            target_velocity = 0;
-            launcher1.setPower(0);
-            launcher2.setPower(0);
-        }
-
-        telemetry.addData("Velocity", current_velocity);
-        telemetry.addData("Power", launcher1.getPower());
-        telemetry.addData("State", current.toString());
+        telemetry.addData("Target Velocity", target_velocity);
+        telemetry.addData("Current Velocity", current_velocity);
         telemetry.addData("Done", controller.done);
+        telemetry.addData("Num Done", numDone);
 
 
+    }
+
+    public void periodicShootingTest(Robot r) {
+        updateShooter();
+        if (shoot) {
+            if (controller.done) {
+
+                    r.intake.setUptakeState(Intake.UptakeState.SLOW);
+                    r.intake.setIntakeState(Intake.IntakeState.SLOW);
+                }
+            else {
+                    r.intake.setUptakeState(Intake.UptakeState.OFF);
+                    r.intake.setIntakeState(Intake.IntakeState.STOP);
+                }
+
+        }
+        else {
+            r.intake.setUptakeState(Intake.UptakeState.OFF);
+            r.intake.setIntakeState(Intake.IntakeState.STOP);
+        }
+
+
+
+
+        r.intake.periodic();
+        telemetry.addData("Target Velocity", target_velocity);
+        telemetry.addData("Current Velocity", current_velocity);
+        telemetry.addData("State", current);
+        telemetry.addData("Done", controller.done);
+        telemetry.addData("Volts", hw.voltageSensor.iterator().next().getVoltage());
+        telemetry.update();
+        log();
+        r.intake.log();
+    }
+
+    public void updateShooter() {
+        double pdfl = 0;
+        prev_velocity = current_velocity;
+        current_velocity = tickstoRPM(launcher1.getVelocity());
+        controller.update(current_velocity, target_velocity);
+
+        // 1) Detect shot
+            if (!inBoost/* && !inAggressive*/) {
+                double drop = prev_velocity - current_velocity;
+                if (drop > (DROP_THRESHOLD * target_velocity) || current_velocity < target_velocity * FALL_THRESHOLD) {
+                    inBoost = true;
+                    ;
+                    timer.reset();
+                }
+                controller.updateConstants(p, d, f, l, i);
+                pdfl = controller.run();
+            }
+
+            // 2) BOOST PHASE
+            if (inBoost) {
+                launcher1.setPower(1);
+                launcher2.setPower(1);
+
+                if (timer.getElapsedTimeSeconds() > boostTime) {
+                    inBoost = false;
+                    //inAggressive = true;
+                }
+                return; // skip PID this cycle
+            }
+
+            if (current == LauncherState.STOP)
+                pdfl = 0;
+            // 3) AGGRESSIVE PID RECOVERY
+            /*
+            if (inAggressive) {
+
+                if (Math.abs(target_velocity - current_velocity) < RECOVERY_THRESHOLD) {
+                    inAggressive = false;
+                }
+
+                controller.updateConstants(p2, d2, f2, l2, i2);
+                pdfl = controller.run();
+            } */
+            // 4) Set Power (steady state)
+            launcher1.setPower(pdfl);
+            launcher2.setPower(pdfl);
     }
 
     public double tickstoRPM(double velocity) {
@@ -214,6 +319,15 @@ public class Launcher extends SubsystemBase {
         setLauncherState(LauncherState.STOP);
         launcher1.setPower(0);
         launcher2.setPower(0);
+    }
+
+    public void log() {
+        Logger.logData(LogType.LAUNCHER_TARGET, String.valueOf(target_velocity));
+        Logger.logData(LogType.LAUNCHER_VELOCITY, String.valueOf(current_velocity));
+        Logger.logData(LogType.LAUNCHER_SETTLED, String.valueOf(controller.done));
+        Logger.logData(LogType.BOOST, String.valueOf(inBoost));
+        Logger.logData(LogType.AGGRESSIVE, String.valueOf(inAggressive));
+        Logger.logData(LogType.LAUNCHER_POWER, String.valueOf(launcher1.getPower()));
     }
 
 

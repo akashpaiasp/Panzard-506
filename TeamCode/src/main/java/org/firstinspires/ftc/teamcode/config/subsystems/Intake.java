@@ -11,6 +11,8 @@ import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.teamcode.config.util.logging.LogType;
+import org.firstinspires.ftc.teamcode.config.util.logging.Logger;
 
 /*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
@@ -21,6 +23,8 @@ public class Intake extends SubsystemBase {
     private MultipleTelemetry telemetry;
     private Servo pusherL, pusherM,  pusherR;
     public DcMotorEx intake, uptake;
+    public static double launchUptake = 1;
+    public static double launchIntake = 1;
 
     private static double
             lOpen = 0.5,
@@ -85,30 +89,36 @@ public class Intake extends SubsystemBase {
     }
     public void periodic() {
         switch (currentIntake) {
-            case STOP : intake.setPower(0);
-            break;
-            case INTAKE: intake.setPower(1);
-            break;
-            case OUTTAKE: intake.setPower(-1);
-            break;
-            case SLOW: intake.setPower(.95);
+            case STOP:
+                intake.setPower(0);
+                break;
+            case INTAKE:
+                intake.setPower(1);
+                break;
+            case OUTTAKE:
+                intake.setPower(-1);
+                break;
+            case SLOW:
+                intake.setPower(launchIntake);
                 break;
         }
         switch (currentUptake) {
-            case OFF : uptake.setPower(0);
+            case OFF:
+                uptake.setPower(0);
                 break;
-            case ON: uptake.setPower(1);
+            case ON:
+                uptake.setPower(1);
 
                 break;
-            case BACK : uptake.setPower(-.9);
+            case BACK:
+                uptake.setPower(-.9);
                 break;
-            case SLOW: uptake.setPower(.6);
+            case SLOW:
+                uptake.setPower(launchUptake);
                 break;
         }
 
         telemetry.addData("Intake amps", intake.getCurrent(CurrentUnit.AMPS));
-        telemetry.addData("Intake power", intake.getPower());
-        telemetry.addData("Uptake power", uptake.getPower());
     }
 
     public void init() {
@@ -116,5 +126,10 @@ public class Intake extends SubsystemBase {
         intake.setPower(0);
         setUptakeState(UptakeState.OFF);
         uptake.setPower(0);
+    }
+
+    public void log(){
+        Logger.logData(LogType.INTAKE_POWER, String.valueOf(intake.getPower()));
+        Logger.logData(LogType.UPTAKE_POWER, String.valueOf(uptake.getPower()));
     }
 }

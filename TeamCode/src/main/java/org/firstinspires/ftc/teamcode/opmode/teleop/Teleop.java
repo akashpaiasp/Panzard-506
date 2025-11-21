@@ -14,10 +14,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.config.commands.Aim;
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
+import org.firstinspires.ftc.teamcode.config.util.logging.CSVInterface;
 import org.firstinspires.ftc.teamcode.config.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.config.subsystems.Launcher;
-import org.firstinspires.ftc.teamcode.config.subsystems.MyLED;
+import org.firstinspires.ftc.teamcode.config.util.Timer;
 
+@Config
 @TeleOp (name = "TelePop")
 
 public class Teleop extends LinearOpMode {
@@ -25,6 +27,8 @@ public class Teleop extends LinearOpMode {
     private GamepadEx g1;
     private GamepadEx g2;
     private double scaleFactor = 1;
+    public Timer loopTimer = new Timer();
+    private double lastTime = 0, currentTime = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         CommandScheduler.getInstance().reset();
@@ -41,11 +45,15 @@ public class Teleop extends LinearOpMode {
 
 
         waitForStart();
+        loopTimer.reset();
         robot.tStart();
         robot.dualControls(g1, g2);
 
 
         while (opModeIsActive()) {
+            lastTime = currentTime;
+            currentTime = loopTimer.getElapsedTime();
+            telemetry.addData("Loop Time", currentTime - lastTime);
 
             //Update everything
             robot.tPeriodic();
@@ -88,6 +96,11 @@ public class Teleop extends LinearOpMode {
 
             if(!gamepad1.right_bumper)
                 new Aim(robot, goalX, robot.getAlliance() == Alliance.BLUE ? blueY : redY).execute();
+
+            if (gamepad1.right_bumper || gamepad2.right_bumper)
+                robot.launcher.setLauncherState(Launcher.LauncherState.OUT);
+            else
+                robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
 
@@ -95,14 +108,16 @@ public class Teleop extends LinearOpMode {
 
 
             //Driving (driver 1)
-            robot.getFollower().setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    robot.robotCentric
-            );
-
-
+            //if (!gamepad2.right_bumper) {
+                robot.getFollower().setTeleOpDrive(
+                        -gamepad1.left_stick_y,
+                        -gamepad1.left_stick_x,
+                        -gamepad1.right_stick_x,
+                        robot.robotCentric
+                );
+           // } else {
+               // robot.getFollower().setTeleOpDrive(0, 0, 0, 0);
+          //  }
 
 
             //Use this driving code only if pedro pathing doesn't work
@@ -158,5 +173,6 @@ public class Teleop extends LinearOpMode {
                 robot.driveTrain.rr.setPower(rightBackPower * scaleFactor); */
 
         }
+        CSVInterface.log();
     }
 }

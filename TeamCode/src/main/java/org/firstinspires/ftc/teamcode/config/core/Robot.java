@@ -16,9 +16,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.config.commands.*;
 import org.firstinspires.ftc.teamcode.config.core.paths.AutoDriving;
 import org.firstinspires.ftc.teamcode.config.core.util.*;
+import org.firstinspires.ftc.teamcode.config.util.logging.LogType;
+import org.firstinspires.ftc.teamcode.config.util.logging.Logger;
 import org.firstinspires.ftc.teamcode.config.pedro.Constants;
 import org.firstinspires.ftc.teamcode.config.subsystems.*;
-import org.firstinspires.ftc.teamcode.config.util.AxonContinuous;
 import org.firstinspires.ftc.teamcode.config.util.Timer;
 
 
@@ -47,9 +48,9 @@ public class Robot {
     public boolean robotCentric = false;
     public static Alliance alliance = Alliance.RED;
 
-    public static double goalX = 43;
-    public static double blueY = 43;
-    public static double redY = -43;
+    public static double goalX = 72;
+    public static double blueY = 72;
+    public static double redY = -72;
 
     //public static Pose cornerBlueFront = new Pose(-72, -72);
     public static Pose cornerBlueBack = new Pose(-61.9, -65.9);
@@ -61,6 +62,8 @@ public class Robot {
     public boolean intakeOff = true;
 
     public static boolean auto = false;
+
+    public static boolean logData = true;
 
 
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
@@ -88,25 +91,19 @@ public class Robot {
         //aInitLoop = false;
        // telemetry.addData("Start Pose", p);
         init();
-            turret.spin.numRotations = 0;
-            turret.spin.partial_rotations = 0;
-            turret.spin.full_rotations = 0;
+        turret.spin.numRotations = 0;
+        turret.spin.partial_rotations = 0;
+        turret.spin.full_rotations = 0;
+        Logger.first = true;
     }
 
     //Teleop Controls here
     public void dualControls(GamepadEx g1, GamepadEx g2) {
-
-
-        // Left and Right triggers on both controllers
-        Trigger lTG1 = new Trigger(() -> g1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER ) > 0.3);
-        Trigger lTG2 = new Trigger(() -> g1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER ) > 0.3);
-        Trigger rTG1 = new Trigger(() -> g2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER ) > 0.3);
-        Trigger rTG2 = new Trigger(() -> g2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER ) > 0.3);
-
         //Buttons
 
 
         g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
+            //launcher.setLauncherState(Launcher.LauncherState.SHOOT);
             if (launcher.controller.done) {
                 intake.setUptakeState(Intake.UptakeState.SLOW);
                 intake.setIntakeState(Intake.IntakeState.SLOW);
@@ -131,10 +128,11 @@ public class Robot {
 
         g1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new Fire3(this));
 
-        g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
-            launcher.setLauncherState(Launcher.LauncherState.OUT);
+        /*
+        g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).and(g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)).negate().whenActive(new InstantCommand(() -> {
+            launcher.setLauncherState(Launcher.LauncherState.RAMPUP);
             //intake.setIntakeState(Intake.IntakeState.INTAKE);
-        }));
+        })); */
         g1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whileHeld(new InstantCommand(() -> {
             launcher.setLauncherState(Launcher.LauncherState.IN);
         }));
@@ -234,14 +232,14 @@ public class Robot {
     public void tPeriodic() {
         follower.update();
         telemetry.update();
-        /*
-        //autoDriving.update();
-        telemetry.update();
-        turret.periodic();
-        launcher.periodic();
-        intake.periodic();
-        hood.periodic();
-        */
+        if (logData) log();
+
+        //turret.periodic();
+       // launcher.periodic();
+        //intake.periodic();
+      //  hood.periodic();
+    //    led.periodic();
+
 
     }
 
@@ -281,8 +279,11 @@ public class Robot {
     }
 
     public void flipAlliance() {
-        if (alliance == Alliance.BLUE) setAlliance(Alliance.RED);
-        else setAlliance(Alliance.BLUE);
+        if (alliance == Alliance.BLUE)
+            setAlliance(Alliance.RED);
+        else
+            setAlliance(Alliance.BLUE);
+        follower.setPose(new Pose(follower.getPose().getX(), follower.getPose().getY(), follower.getPose().getHeading() + Math.toRadians(180)));
     }
 
     public void resetPose() {
@@ -316,6 +317,14 @@ public class Robot {
             }
         //follower.setPose(new Pose(x, y, heading));
         follower.setPose(new Pose(0, 0, follower.getHeading()));
+    }
+
+    public void log() {
+        turret.log();
+        launcher.log();
+        Logger.logData(LogType.ROBOT_X, String.valueOf(getFollower().getPose().getX()));
+        Logger.logData(LogType.ROBOT_Y, String.valueOf(getFollower().getPose().getY()));
+        Logger.logData(LogType.ROBOT_HEADING, String.valueOf(Math.toDegrees(getFollower().getPose().getHeading())));
     }
 
 }

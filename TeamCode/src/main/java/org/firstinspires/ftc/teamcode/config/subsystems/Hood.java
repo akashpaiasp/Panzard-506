@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.config.subsystems;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -12,6 +13,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 /*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
 */
+@Config
+
 public class Hood extends SubsystemBase {
     //Telemetry = text that is printed on the driver station while the robot is running
     private MultipleTelemetry telemetry;
@@ -53,6 +56,7 @@ public class Hood extends SubsystemBase {
     public void periodic() {
 
         telemetry.addData("Hood", hood.getPosition());
+        telemetry.addData("Hood state", current);
         switch (current) {
             case UP:
                 target = hoodUp;

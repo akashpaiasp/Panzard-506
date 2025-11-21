@@ -11,7 +11,7 @@ public class TwelveBall {
     //Red Poses
     public static final Pose startPose = new Pose(40.7, -56.5, 0);
 
-    private static final Pose shootPose = new Pose(22.82, -29.24, -1.6);
+        private static final Pose shootPose = new Pose(22.82, -29.24, -1.6);
     private static final Pose pickup1 = new Pose(21.18, -64, -1.588);
     private static final Pose strafeGate = new Pose(15, -58, -1.588);
     private static final Pose gate = new Pose(15, -63.5, -1.588);
@@ -26,8 +26,8 @@ public class TwelveBall {
 
     private static final Pose shootPoseBlue = new Pose(-1.7, 0, 1.6);
     private static final Pose pickup1Blue = new Pose(-1.7, 42.5, 1.6);
-    private static final Pose strafeGateBlue = new Pose(2, 40, -1.588);
-    private static final Pose gateBlue = new Pose(2, 42.5, -1.588);
+    private static final Pose strafeGateBlue = new Pose(2, 40, 1.588);
+    private static final Pose gateBlue = new Pose(2, 42.5, 1.588);
 
     private static final Pose strafe1Blue = new Pose(-22.7, 8.5, 1.58);
     private static final Pose pickup2Blue = new Pose(-22.7, 44, 1.58);
@@ -62,7 +62,7 @@ public class TwelveBall {
     public static PathChain gate(Follower f) {
         PathChain chain = f.pathBuilder()
                 .addPath(new BezierCurve(pickup1, strafeGate))
-                .setLinearHeadingInterpolation(pickup1.getHeading(), gate.getHeading())
+                .setLinearHeadingInterpolation(pickup1.getHeading(), strafeGate.getHeading())
                 .addPath(new BezierCurve(strafeGate, gate))
                 .setLinearHeadingInterpolation(strafeGate.getHeading(), gate.getHeading())
                 .build();
@@ -73,7 +73,7 @@ public class TwelveBall {
     public static PathChain shoot2(Follower f) {
         PathChain chain = f.pathBuilder()
                 .addPath(new BezierLine(gate, shootPose))
-                .setLinearHeadingInterpolation(pickup1.getHeading(), shootPose.getHeading())
+                .setLinearHeadingInterpolation(gate.getHeading(), shootPose.getHeading())
                 .build();
 
         return chain;
@@ -91,7 +91,7 @@ public class TwelveBall {
     public static PathChain pickup2(Follower f) {
         PathChain chain = f.pathBuilder()
                 .addPath(new BezierCurve(strafe1, pickup2))
-                .setLinearHeadingInterpolation(strafe1.getHeading(), pickup1.getHeading())
+                .setLinearHeadingInterpolation(strafe1.getHeading(), pickup2.getHeading())
                 .build();
 
         return chain;

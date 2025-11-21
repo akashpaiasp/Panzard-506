@@ -5,11 +5,13 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.SubsystemBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.config.core.Robot;
+import org.firstinspires.ftc.teamcode.config.util.logging.LogType;
+import org.firstinspires.ftc.teamcode.config.util.logging.Logger;
 import org.firstinspires.ftc.teamcode.config.util.AxonContinuous;
 import org.firstinspires.ftc.teamcode.config.util.PDFLController;
 
@@ -21,7 +23,7 @@ public class Turret extends SubsystemBase {
     //Telemetry = text that is printed on the driver station while the robot is running
     public double power = 0;
 
-    public static double offset = -44;
+    public static double offset = 28;
     //61.7, 14.9
     //public static boolean powerMode = false;
 
@@ -86,6 +88,7 @@ public class Turret extends SubsystemBase {
 
 
     public void periodic() {
+        //if (Robot.logData) log();
         spin.calculate();
         current = (Math.round(getTotalDegrees() * 10.0)) / 10.0;
         controller.update(current, target);
@@ -153,6 +156,14 @@ public class Turret extends SubsystemBase {
 
     public void setTargetDegrees(double targetDeg) {
         target = targetDeg;
+    }
+
+    public void log() {
+        Logger.logData(LogType.TURRET_TARGET, String.valueOf(target));
+        Logger.logData(LogType.TURRET_VOLTS, String.valueOf(spin.getVolts()));
+        Logger.logData(LogType.TURRET_PREV, String.valueOf(spin.lastVoltage));
+        Logger.logData(LogType.TURRET_FULL_ROTS, String.valueOf(spin.full_rotations));
+
     }
 
 }

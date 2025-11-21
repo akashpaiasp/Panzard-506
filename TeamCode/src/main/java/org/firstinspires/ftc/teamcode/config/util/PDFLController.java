@@ -19,7 +19,7 @@ public class PDFLController {
 
     private double delta_time;
     private double delta_error;
-    private double risePercent = 0.03;
+    private double risePercent = 0.045;
     private int reached = 0;
 
     //Rise time = amount of time it takes to reach
@@ -27,15 +27,16 @@ public class PDFLController {
     private Timer timer = new Timer();
     //Timer to track rise time
     private Timer riseTimer = new Timer();
+    private boolean risen = false;
     private boolean settled = true;
-    public boolean done = true;
+    public boolean done = false;
     private double
             tot_error = 0.0,
             prev_error = 0.0,
             error = 0.0,
             error2 = 0.0,
             reachedThreshold = 30,
-            settledThreshold = 210,
+            settledThreshold = Integer.MAX_VALUE,//200,
             riseTime = 0,
             settlingTime = 0,
             lastRise = 0,
@@ -128,11 +129,14 @@ public class PDFLController {
         }
 
         //If we have reached the target, log rise time
-        if (reached == 1) {
-             riseTime = timer.getElapsedTimeSeconds() - lastRise;
+        if (reached >= 1) {
+            if (!risen) {
+                riseTime = timer.getElapsedTimeSeconds() - lastRise;
+                risen = true;
+            }
         }
 
-        done = reached > 0 && settled;
+        done = reached > 0 && settled && target != 0;
 
 
          p = pComponent(error);
@@ -189,8 +193,9 @@ public class PDFLController {
     }
 
     public void update(double current, double target) {
-        if (target != getTarget()) {
+        if (target != getTarget() || (Math.abs(error) > target * risePercent || Math.abs(error) > reachedThreshold)) {
             reached = 0;
+            risen = false;
             //riseTimer.reset();
             lastRise = timer.getElapsedTimeSeconds();
         }
