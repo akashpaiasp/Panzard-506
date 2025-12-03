@@ -31,24 +31,38 @@ public class Turret extends SubsystemBase {
    // public boolean first = false;
 
     public static double p = 0.03, i = 0, d = 1, f = 0, l = 0.005;
+    public static double p2 = 0.005, i2 = 0, d2 = 1, f2 = 0, l2 = 0.005;
+
     public PDFLController controller;
+    public PDFLController llcontroller;
 
     public static double target = 0.0;
     public double current;
-    public boolean usePID = true;
+    public boolean limelightMode = true;
 
 
     private MultipleTelemetry telemetry;
     public AxonContinuous spin;
     //public Servo spin;
+
     public Turret(HardwareMap hardwareMap, Telemetry telemetry) {
         //init telemetry
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        spin = new AxonContinuous(hardwareMap, "sh2", "as0");
+        spin = new AxonContinuous(hardwareMap, "sh2", "ca0");
         spin.getC().setDirection(DcMotorSimple.Direction.REVERSE);
         //spin = hardwareMap.get(Servo.class, "sh2");
         controller = new PDFLController(p, d, f, l, i);
+        llcontroller = new PDFLController(p2, d2, f2, l2, i2);{
+            //init telemetry
+            this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+            spin = new AxonContinuous(hardwareMap, "sh2", "ca0");
+            spin.getC().setDirection(DcMotorSimple.Direction.REVERSE);
+            //spin = hardwareMap.get(Servo.class, "sh2");
+            controller = new PDFLController(p, d, f, l, i);
+            llcontroller = new PDFLController(p2, d2, f2, l2, i2);
+        }
     }
 
     public void periodicTest() {
@@ -92,8 +106,11 @@ public class Turret extends SubsystemBase {
         spin.calculate();
         current = (Math.round(getTotalDegrees() * 10.0)) / 10.0;
         controller.update(current, target);
-        if (usePID)
+        llcontroller.updateConstants(p2, d2, f2, l2, i2);
+        if (!limelightMode)
             power = controller.run();
+        else
+            power = llcontroller.run();
 
         power = Range.clip(power, -1, 1);
 
@@ -102,6 +119,7 @@ public class Turret extends SubsystemBase {
         telemetry.addData("turret target", target);
         telemetry.addData("turret power", power);
         telemetry.addData("turret volts", spin.getVolts());
+        telemetry.addData("Use Limelight", limelightMode);
 
     }
 
@@ -164,6 +182,10 @@ public class Turret extends SubsystemBase {
         Logger.logData(LogType.TURRET_PREV, String.valueOf(spin.lastVoltage));
         Logger.logData(LogType.TURRET_FULL_ROTS, String.valueOf(spin.full_rotations));
 
+    }
+
+    public void updateLL(double d) {
+        llcontroller.update(d, 1);
     }
 
 }

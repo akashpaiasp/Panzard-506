@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
+import static org.firstinspires.ftc.teamcode.config.core.Robot.alliance;
 import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.blueY;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.goalX;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.redY;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.blueX;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.goalY;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.redX;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,6 +13,7 @@ import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.config.commands.Aim;
+import org.firstinspires.ftc.teamcode.config.commands.AimLimelight;
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.util.logging.CSVInterface;
@@ -54,6 +56,7 @@ public class Teleop extends LinearOpMode {
             lastTime = currentTime;
             currentTime = loopTimer.getElapsedTime();
             telemetry.addData("Loop Time", currentTime - lastTime);
+            telemetry.addData("Distance From Goal", robot.getDistanceFromGoal());
 
             //Update everything
             robot.tPeriodic();
@@ -94,8 +97,16 @@ public class Teleop extends LinearOpMode {
                 robot.intakeOff = true;
             }
 
-            if(!gamepad1.right_bumper)
-                new Aim(robot, goalX, robot.getAlliance() == Alliance.BLUE ? blueY : redY).execute();
+            if(!gamepad1.right_bumper) {
+                /*if (robot.limelight.getResult().isValid() && robot.turret.getTotalDegrees() < 90 && robot.turret.getTotalDegrees() > -90) {
+                    robot.turret.limelightMode = true;
+                    new AimLimelight(robot).execute();
+                }
+                else { */
+                    robot.turret.limelightMode = false;
+                    new Aim(robot, alliance == Alliance.RED ? redX : blueX, goalY).execute();
+                //}
+            }
 
             if (gamepad1.right_bumper || gamepad2.right_bumper)
                 robot.launcher.setLauncherState(Launcher.LauncherState.OUT);
@@ -171,8 +182,13 @@ public class Teleop extends LinearOpMode {
                 robot.driveTrain.rf.setPower(rightFrontPower * scaleFactor);
                 robot.driveTrain.lr.setPower(leftBackPower * scaleFactor);
                 robot.driveTrain.rr.setPower(rightBackPower * scaleFactor); */
+            telemetry.addData("x" , robot.getFollower().getPose().getX());
+            telemetry.addData("y" , robot.getFollower().getPose().getY());
+            telemetry.addData("heading" , robot.getFollower().getPose().getHeading());
 
         }
         CSVInterface.log();
+        robot.getFollower().getVelocity().getMagnitude();
     }
+
 }

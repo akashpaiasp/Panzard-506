@@ -19,7 +19,10 @@ public class PDFLController {
 
     private double delta_time;
     private double delta_error;
-    private double risePercent = 0.045;
+    public static double risePercent = 0;
+
+    public static double reachedThreshold = 30;
+
     private int reached = 0;
 
     //Rise time = amount of time it takes to reach
@@ -35,7 +38,6 @@ public class PDFLController {
             prev_error = 0.0,
             error = 0.0,
             error2 = 0.0,
-            reachedThreshold = 30,
             settledThreshold = Integer.MAX_VALUE,//200,
             riseTime = 0,
             settlingTime = 0,

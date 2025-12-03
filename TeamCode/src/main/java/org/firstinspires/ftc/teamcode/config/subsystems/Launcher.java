@@ -40,7 +40,7 @@ public class Launcher extends SubsystemBase {
     public static double l = 0.08;
     public static double i = 0.0001;
 
-    public static double p2 = p / 2.5;
+    public static double p2 = 0.0005;
     public static double d2 = d / 2.5;
     public static double f2 = 0;
     public static double l2 = 0.08;
@@ -276,7 +276,10 @@ public class Launcher extends SubsystemBase {
                     ;
                     timer.reset();
                 }
-                controller.updateConstants(p, d, f, l, i);
+                if (target_velocity < 3800)
+                    controller.updateConstants(p2, d, f, l, i);
+                else
+                    controller.updateConstants(p, d, f, l, i);
                 pdfl = controller.run();
             }
 

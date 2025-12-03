@@ -1,23 +1,25 @@
 package org.firstinspires.ftc.teamcode.config.commands;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.util.Range;
 import com.seattlesolvers.solverslib.command.CommandBase;
 
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
+import org.firstinspires.ftc.teamcode.config.subsystems.Turret;
+import org.firstinspires.ftc.teamcode.config.util.PDFLController;
 
-public class Aim extends CommandBase {
+@Config
+public class AimLimelight extends CommandBase {
     private Robot r;
-    private double targetX;
-    private double targetY;
-    public static double fudgeFactor = 0;
 
     private static final double MIN_ANGLE = -90; // turret left limit
     private static final double MAX_ANGLE = 90;  // turret right limit
-    public Aim(Robot r, double targetX, double targetY) {
+    public static double p = 0.03, i = 0, d = 1, f = 0, l = 0.005;
+    public double turretRelativeAngle = 0;
+
+    public AimLimelight(Robot r) {
         this.r = r;
-        this.targetX = targetX;
-        this.targetY = targetY;
     }
 
     @Override
@@ -26,18 +28,13 @@ public class Aim extends CommandBase {
          * Calculates the turret angle relative to the robot's front (degrees).
          * Clamps to [-90°, +90°].
          */
-        double dx = targetX - r.getFollower().getPose().getX();
-        double dy = targetY - r.getFollower().getPose().getY();
-        double robotHeading = Math.toDegrees(r.getAlliance() == Alliance.RED ? r.getFollower().getPose().getHeading(): r.getFollower().getPose().getHeading() + Math.toRadians(180));
+        if (r.limelight.getResult().isValid()) {
+            double angle = r.limelight.getResult().getTx();
+            //turretRelativeAngle = 0;
 
-        double angleToTargetField = Math.toDegrees(Math.atan2(dy, dx));
-
-        double turretRelativeAngle = wrapTo180(angleToTargetField - robotHeading + fudgeFactor) ;
-
-        turretRelativeAngle = Range.clip(turretRelativeAngle, MIN_ANGLE, MAX_ANGLE);
-        //turretRelativeAngle = 0;
-
-        r.turret.setTargetDegrees(turretRelativeAngle);
+            if (!((r.turret.getTotalDegrees() > 85 && angle < 0) || r.turret.getTotalDegrees() < -85 && angle > 0))
+                r.turret.updateLL(angle);
+        }
 
         r.getTelemetry().addData("Target Degrees", turretRelativeAngle);
 

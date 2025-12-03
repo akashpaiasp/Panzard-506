@@ -2,15 +2,10 @@
 
 package org.firstinspires.ftc.teamcode.config.subsystems;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.NetworkTable;
-
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.follower.Follower;
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -22,7 +17,6 @@ import com.seattlesolvers.solverslib.command.SubsystemBase;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D; // ? needed ?
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-import java.util.List;
 //subsystem of the limelight 3A
 public class Limelight extends SubsystemBase {
     //for telemetry of the limelight
@@ -35,21 +29,18 @@ public class Limelight extends SubsystemBase {
         //links to limelight - need to make sure it connect properly
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        try {
-            limelight = new Limelight3A("172.29.0.1"); //may need changing?
-        } catch (Exception e) {
-            telemetry.addLine("ERROR: Limelight not detected!");
-            telemetry.update();
-            sleep(3000);
-            return;  // prevent opmode from running
-        }
+        limelight = hardwareMap.get(Limelight3A.class, "ll");
 
         //default pipeline - can be changed later
-        setPipeline(0);
+        setPipeline(8);
+
+        //8 = red goal, 7 = obeselisque, 6 = blue goal
 
         //I think this is the best place to put this function.
         limelight.start();
     }
+
+    private LLResult result;
     
     public void startLimelight() {
         limelight.start();
@@ -66,7 +57,13 @@ public class Limelight extends SubsystemBase {
     }
 
     public void periodic() {
+        /*
         updateTelemetry();
+        update(); */
+    }
+
+    public double getLatency() {
+        return result.getCaptureLatency() + result.getTargetingLatency();
     }
 
     //bascially copied code
@@ -82,7 +79,7 @@ public class Limelight extends SubsystemBase {
         LLResult result = limelight.getLatestResult();
         if (result.isValid()) {
             // Access general information
-            Pose3D botpose = result.getBotpose();
+            Pose3D botpose = result.getBotpose_MT2();
             double captureLatency = result.getCaptureLatency();
             double targetingLatency = result.getTargetingLatency();
             double parseLatency = result.getParseLatency();
@@ -98,7 +95,21 @@ public class Limelight extends SubsystemBase {
             telemetry.addData("Botpose", botpose.toString());
         }
         
-        telemetry.update();
+        //telemetry.update();
+    }
+
+
+//update limelight based off of imu heading, makes 3d localization more accurate.
+    public void update() {
+        result = limelight.getLatestResult();
+    }
+
+    public LLResult getResult() {
+        return result;
+    }
+
+    public Pose3D botPose() {
+        return result.getBotpose_MT2();
     }
 
     

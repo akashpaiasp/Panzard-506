@@ -53,7 +53,7 @@ public class Constants {
             .forwardPodY(-5.73)
             .strafePodX(0) //47 //145.5
             .distanceUnit(DistanceUnit.INCH)
-            .hardwareMapName("pp")
+            .hardwareMapName("ci0")
             .forwardEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD)
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.REVERSED);
 

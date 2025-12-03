@@ -3,8 +3,9 @@ package org.firstinspires.ftc.teamcode.config.core;
 import static org.firstinspires.ftc.teamcode.config.core.util.Opmode.*;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.math.Vector;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.seattlesolvers.solverslib.command.InstantCommand;
-import com.seattlesolvers.solverslib.command.button.Trigger;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.seattlesolvers.solverslib.gamepad.GamepadKeys;
 import com.pedropathing.follower.Follower;
@@ -13,15 +14,18 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.config.commands.*;
 import org.firstinspires.ftc.teamcode.config.core.paths.AutoDriving;
 import org.firstinspires.ftc.teamcode.config.core.util.*;
+import org.firstinspires.ftc.teamcode.config.util.PoseEkf;
 import org.firstinspires.ftc.teamcode.config.util.logging.LogType;
 import org.firstinspires.ftc.teamcode.config.util.logging.Logger;
 import org.firstinspires.ftc.teamcode.config.pedro.Constants;
 import org.firstinspires.ftc.teamcode.config.subsystems.*;
 import org.firstinspires.ftc.teamcode.config.util.Timer;
 
+import java.util.List;
 
 
 @Config
@@ -48,9 +52,16 @@ public class Robot {
     public boolean robotCentric = false;
     public static Alliance alliance = Alliance.RED;
 
-    public static double goalX = 72;
-    public static double blueY = 72;
-    public static double redY = -72;
+    public static double redX = 72;
+    public static double blueX = -72;
+
+    public static double goalY = 72;
+
+    double centerX = 72, centerY = 72;
+    double rightWallX = 60, rightWallY = 72;  // right wall center
+    double frontWallX = 72, frontWallY = 60;
+
+    double maxDist = 72;
 
     //public static Pose cornerBlueFront = new Pose(-72, -72);
     public static Pose cornerBlueBack = new Pose(-61.9, -65.9);
@@ -69,16 +80,44 @@ public class Robot {
     public int flip = 1, tState = -1, sState = -1, spec0State = -1, spec180State = -1, c0State = -1, aFGState = -1, specTransferState = -1, fSAState = -1, sRState = -1, hState = -1;
     private boolean aInitLoop, frontScore = false, backScore = true, automationActive = false;
 
+    public static double
+        processNoiseXY = 0.7, processNoiseHeading = 0.03,
+        visionNoiseXY = 1.8, visionNoiseHeading = 0.8;
+
+
+    PoseEkf ekf;
+    public Timer timer = new Timer();
+
+    public double now = 0.0, last = 0.0, dt = 0.0;
+
     public Robot(HardwareMap hw, Telemetry telemetry, Alliance alliance, Pose startPose) {
+        List<LynxModule> allHubs = hw.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
+
+
         this.op = AUTONOMOUS;
         this.hw = hw;
         this.telemetry = telemetry;
         Robot.alliance = alliance;
         p = startPose.copy();
 
+
         follower = Constants.createFollower(hw);
         follower.setStartingPose(startPose);
         follower.update();
+
+
+        timer.reset();
+
+
+        ekf = new PoseEkf(
+                p.getX(), p.getY(),
+                processNoiseXY, processNoiseHeading,
+                visionNoiseXY, visionNoiseHeading
+        );
 
         launcher = new Launcher(hw, telemetry);
         turret = new Turret(hw, telemetry);
@@ -87,6 +126,7 @@ public class Robot {
         intake = new Intake(hw, telemetry);
         led = new MyLED(hw, telemetry);
         //limelight = new Limelight(hw, telemetry);
+        //limelight.update();
 
         //aInitLoop = false;
        // telemetry.addData("Start Pose", p);
@@ -162,7 +202,7 @@ public class Robot {
         })); */
 
         //robotCentric = true;
-        g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::resetPose));
+        //g1.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::resetPose));
         g2.getGamepadButton(GamepadKeys.Button.BACK).whenPressed(new InstantCommand(this::flipAlliance));
 
         /*g1.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> {
@@ -212,13 +252,13 @@ public class Robot {
         telemetry.addData("path", follower.getCurrentPath());
         follower.update();
         telemetry.update();
-        tPeriodic();
         turret.periodic();
         launcher.periodic();
         intake.periodic();
         hood.periodic();
         //autoEndPose = follower.getPose().copy();
         autoEndPose = new Pose(follower.getPose().getX(), follower.getPose().getY(), alliance == Alliance.RED ? follower.getHeading() + Math.toRadians(90) : follower.getHeading() - Math.toRadians(90));
+        if (logData) log();
     }
 
     public void aInitLoop(GamepadEx g1) {
@@ -230,6 +270,7 @@ public class Robot {
     }
 
     public void tPeriodic() {
+        updateGoalCoords();
         follower.update();
         telemetry.update();
         if (logData) log();
@@ -326,5 +367,128 @@ public class Robot {
         Logger.logData(LogType.ROBOT_Y, String.valueOf(getFollower().getPose().getY()));
         Logger.logData(LogType.ROBOT_HEADING, String.valueOf(Math.toDegrees(getFollower().getPose().getHeading())));
     }
+
+    public double getForwardVel() {
+        // Get field-centric velocity from Pedro Pathing
+        Vector fieldVel = follower.getVelocity();
+        double vx_field = fieldVel.getXComponent();
+        double vy_field = fieldVel.getYComponent();
+
+        // Robot heading in radians
+        double theta = follower.getHeading();
+
+        // Rotate field velocity into robot frame: forward is along robot X axis
+        double v_forward = Math.cos(theta) * vx_field + Math.sin(theta) * vy_field;
+        return v_forward;
+    }
+
+    // Returns robot-centric lateral velocity (meters/second)
+// Positive = rightward strafe (adjust sign if your convention differs)
+    public double getLateralVel() {
+        Vector fieldVel = follower.getVelocity();
+        double vx_field = fieldVel.getXComponent();
+        double vy_field = fieldVel.getYComponent();
+
+        double theta = follower.getHeading();
+
+        // Rotate field velocity into robot frame: lateral is along robot Y axis
+        return -Math.sin(theta) * vx_field + Math.cos(theta) * vy_field;
+    }
+
+    // Returns angular velocity (radians/second)
+    public double getAngularVel() {
+        return follower.getAngularVelocity(); // radians/sec
+    }
+
+
+    public void updateEkf() {
+        double v_forward = getForwardVel();
+        double v_lateral = getLateralVel();
+        double omega = getAngularVel();
+
+        last = now;
+        now = timer.getElapsedTimeSeconds();
+        dt = now - last;
+
+        // Raw odometry from follower
+        double odomX = follower.getPose().getX();
+        double odomY = follower.getPose().getY();
+        double odomTheta = follower.getHeading();
+
+        ekf.predict(v_forward, v_lateral, omega, dt, now, odomX, odomY, odomTheta);
+        updateLimelight();
+    }
+
+    public void updateLimelight() {
+        if (limelight.getResult().isValid()) {
+            Pose3D botPose = limelight.botPose();
+
+            // Convert Limelight Pose3D to field x/y
+            double visionX = botPose.getPosition().y; // field x
+            double visionY = botPose.getPosition().x; // field y
+            double visionTimestamp = now - limelight.getLatency(); // get timestamp of when limelight was last read
+
+            // Update EKF only with x/y
+            ekf.updateWithVision(visionX, visionY, visionTimestamp);
+        }
+    }
+
+    public double getDistanceFromGoal() {
+        double goalX = alliance == Alliance.RED ? redX : Robot.blueX;
+        double dx = goalX - follower.getPose().getX();
+        double dy = goalY - follower.getPose().getY();
+        return Math.sqrt(dx*dx + dy*dy);
+    }
+
+    public void updateGoalCoords() {
+        double t;  // blend factor
+        double robotY = follower.getPose().getY();
+        double robotX = follower.getPose().getX();
+        if (alliance == Alliance.RED) {
+            if (robotY > robotX) {
+                // --- LEFT SIDE OF DIAGONAL → use distance from FRONT edge (y=72)
+                double dist = Math.abs(72 - robotY);  // 0 at edge, maxDist at diagonal
+                t = 1.0 - (dist / maxDist);
+                t = Math.min(1.0, Math.max(0.0, t));
+
+                redX = lerp(centerX, frontWallX, t);
+                goalY = lerp(centerY, frontWallY, t);
+
+            } else {
+                // --- RIGHT SIDE OF DIAGONAL → use distance from RIGHT edge (x=72)
+                double dist = Math.abs(72 - robotX);  // same logic
+                t = 1.0 - (dist / maxDist);
+                t = Math.min(1.0, Math.max(0.0, t));
+
+                redX = lerp(centerX, rightWallX, t);
+                goalY = lerp(centerY, rightWallY, t);
+            }
+        }
+        else {
+            if (robotY > -robotX) {
+                // --- LEFT SIDE OF DIAGONAL → use distance from FRONT edge (y=72)
+                double dist = Math.abs(72 - robotY);  // 0 at edge, maxDist at diagonal
+                t = 1.0 - (dist / maxDist);
+                t = Math.min(1.0, Math.max(0.0, t));
+
+                redX = lerp(-centerX, -frontWallX, t);
+                goalY = lerp(centerY, frontWallY, t);
+
+            } else {
+                // --- RIGHT SIDE OF DIAGONAL → use distance from RIGHT edge (x=72)
+                double dist = Math.abs(-72 - robotX);  // same logic
+                t = 1.0 - (dist / maxDist);
+                t = Math.min(1.0, Math.max(0.0, t));
+
+                redX = lerp(-centerX, -rightWallX, t);
+                goalY = lerp(centerY, rightWallY, t);
+            }
+        }
+    }
+
+    private static double lerp(double a, double b, double t) {
+        return a + (b - a) * t;
+    }
+
 
 }
