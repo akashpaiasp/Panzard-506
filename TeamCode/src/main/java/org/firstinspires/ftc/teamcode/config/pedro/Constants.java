@@ -19,7 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 public class Constants {
-    public static String lf = "cm3", lr = "cm2", rf = "em2", rr = "em3";
+    //public static String lf = "cm3", lr = "cm2", rf = "em2", rr = "em3";
 
     //Pid/acceleration constants derived from tuning (last year's values)
     public static FollowerConstants followerConstants = new FollowerConstants()
@@ -40,10 +40,10 @@ public class Constants {
     //Constants relating to the 4 drive motors
     public static MecanumConstants driveConstants = new MecanumConstants()
             //Motor names in the robot's config file
-            .leftFrontMotorName(lf)
-            .leftRearMotorName(lr)
-            .rightFrontMotorName(rf)
-            .rightRearMotorName(rr)
+            .leftFrontMotorName("cm3")
+            .leftRearMotorName("cm2")
+            .rightFrontMotorName("em2")
+            .rightRearMotorName("em3")
 
             //Motor directions
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)

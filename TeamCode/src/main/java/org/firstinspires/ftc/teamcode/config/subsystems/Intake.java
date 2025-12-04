@@ -33,10 +33,10 @@ public class Intake extends SubsystemBase {
     public static double gateRPos = 0.5;
 
     private static double
-            lOpen = 0.5,
-            lClosed = 0.5,
-            rOpen = 0.5,
-            rClosed = 0.5;
+            lOpen = .5,
+            lClosed = .5,
+            rOpen = .5,
+            rClosed = .5;
 
     public enum IntakeState {
         OUTTAKE,
@@ -57,8 +57,6 @@ public class Intake extends SubsystemBase {
     public UptakeState currentUptake = UptakeState.OFF;
     public GateState currentGate = GateState.CLOSED;
 
-    public static String leftGate = "sh3", rightGate = "sh4", intakePort = "em1", uptakePort = "cm1";
-
 
     //state of the subsystem
 
@@ -72,14 +70,12 @@ public class Intake extends SubsystemBase {
         //pusherM = hardwareMap.get(Servo.class, "cs2");
         //pusherM = hardwareMap.get(Servo.class, "cs3");
 
-        gateL = hardwareMap.get(Servo.class, leftGate);
-        gateR = hardwareMap.get(Servo.class, rightGate);
-        intake = hardwareMap.get(DcMotorEx.class, intakePort);
-        uptake = hardwareMap.get(DcMotorEx.class, uptakePort);
+        gateL = hardwareMap.get(Servo.class, "cs5");
+        gateR = hardwareMap.get(Servo.class, "cs4");
+        intake = hardwareMap.get(DcMotorEx.class, "em1");
 
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
-        uptake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //init servos based on their name in the robot's config file
 
@@ -124,21 +120,15 @@ public class Intake extends SubsystemBase {
             case SLOW:
                 uptake.setPower(intakeUptake);
         }
-        if (!manual) {
-            switch (currentGate) {
-                case OPEN:
-                    gateL.setPosition(lOpen);
-                    gateR.setPosition(rOpen);
-                    break;
-                case CLOSED:
-                    gateL.setPosition(lClosed);
-                    gateR.setPosition(rClosed);
-                    break;
-            }
-        }
-        else {
-            gateL.setPosition(gateLPos);
-            gateR.setPosition(gateRPos);
+        switch (currentGate) {
+            case OPEN:
+                gateL.setPosition(lOpen);
+                gateR.setPosition(rOpen);
+                break;
+            case CLOSED:
+                gateL.setPosition(lOpen);
+                gateR.setPosition(rOpen);
+                break;
         }
 
         telemetry.addData("Intake amps", intake.getCurrent(CurrentUnit.AMPS));

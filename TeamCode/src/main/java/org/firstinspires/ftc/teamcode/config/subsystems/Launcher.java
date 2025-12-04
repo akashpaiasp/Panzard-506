@@ -82,8 +82,6 @@ public class Launcher extends SubsystemBase {
     private boolean inAggressive = false;
     boolean ready = false;
 
-    public static String launcherLeft = "em0", launcherRight = "em1";
-
 
 
     public enum LauncherState {
@@ -103,8 +101,8 @@ public class Launcher extends SubsystemBase {
         this.hw = hardwareMap;
 
         //init servos based on their name in the robot's config file
-        launcher1 = hardwareMap.get(DcMotorEx.class, launcherLeft);
-        launcher2 = hardwareMap.get(DcMotorEx.class, launcherRight);
+        launcher1 = hardwareMap.get(DcMotorEx.class, "em0");
+        launcher2 = hardwareMap.get(DcMotorEx.class, "cm0");
         launcher2.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

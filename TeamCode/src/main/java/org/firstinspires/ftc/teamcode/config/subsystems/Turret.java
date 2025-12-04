@@ -45,13 +45,11 @@ public class Turret extends SubsystemBase {
     public AxonContinuous spin;
     //public Servo spin;
 
-    public static String turretPort = "sh2";
-
     public Turret(HardwareMap hardwareMap, Telemetry telemetry) {
         //init telemetry
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        spin = new AxonContinuous(hardwareMap, turretPort, "ca0");
+        spin = new AxonContinuous(hardwareMap, "sh0", "ca0");
         spin.getC().setDirection(DcMotorSimple.Direction.REVERSE);
         //spin = hardwareMap.get(Servo.class, "sh2");
         controller = new PDFLController(p, d, f, l, i);
