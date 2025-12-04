@@ -142,16 +142,16 @@ public class Robot {
         //Buttons
 
 
-        g2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
+        g1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whileHeld(new InstantCommand(() -> {
             //launcher.setLauncherState(Launcher.LauncherState.SHOOT);
             if (launcher.controller.done) {
-                intake.setUptakeState(Intake.UptakeState.SLOW);
-                intake.setIntakeState(Intake.IntakeState.SLOW);
+                intake.setUptakeState(Intake.UptakeState.ON);
+                intake.setIntakeState(Intake.IntakeState.INTAKE);
                 led.setState(MyLED.State.GREEN);
             }
             else {
                 intake.setUptakeState(Intake.UptakeState.OFF);
-                intake.setIntakeState(Intake.IntakeState.STOP);
+                intake.setIntakeState(Intake.IntakeState.OFF);
                 led.setState(MyLED.State.YELLOW);
             }
             launcherOff = false;

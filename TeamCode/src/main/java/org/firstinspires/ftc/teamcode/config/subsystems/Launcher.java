@@ -82,6 +82,8 @@ public class Launcher extends SubsystemBase {
     private boolean inAggressive = false;
     boolean ready = false;
 
+    public static String launcherLeft = "em0", launcherRight = "em1";
+
 
 
     public enum LauncherState {
@@ -101,8 +103,8 @@ public class Launcher extends SubsystemBase {
         this.hw = hardwareMap;
 
         //init servos based on their name in the robot's config file
-        launcher1 = hardwareMap.get(DcMotorEx.class, "em0");
-        launcher2 = hardwareMap.get(DcMotorEx.class, "cm0");
+        launcher1 = hardwareMap.get(DcMotorEx.class, launcherLeft);
+        launcher2 = hardwareMap.get(DcMotorEx.class, launcherRight);
         launcher2.setDirection(DcMotorSimple.Direction.REVERSE);
         launcher1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         launcher2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -234,18 +236,18 @@ public class Launcher extends SubsystemBase {
         if (shoot) {
             if (controller.done) {
 
-                    r.intake.setUptakeState(Intake.UptakeState.SLOW);
-                    r.intake.setIntakeState(Intake.IntakeState.SLOW);
+                    r.intake.setUptakeState(Intake.UptakeState.ON);
+                    r.intake.setIntakeState(Intake.IntakeState.INTAKE);
                 }
             else {
                     r.intake.setUptakeState(Intake.UptakeState.OFF);
-                    r.intake.setIntakeState(Intake.IntakeState.STOP);
+                    r.intake.setIntakeState(Intake.IntakeState.OFF);
                 }
 
         }
         else {
             r.intake.setUptakeState(Intake.UptakeState.OFF);
-            r.intake.setIntakeState(Intake.IntakeState.STOP);
+            r.intake.setIntakeState(Intake.IntakeState.OFF);
         }
 
 

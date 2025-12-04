@@ -61,15 +61,15 @@ public class TwelveBall extends OpMode {
                 if (!robot.getFollower().isBusy()) {
                     if (robot.launcher.controller.done) {
                         doneOff = false;
-                        robot.intake.setIntakeState(Intake.IntakeState.SLOW);
-                        robot.intake.setUptakeState(Intake.UptakeState.SLOW);
+                        robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
+                        robot.intake.setUptakeState(Intake.UptakeState.ON);
                     }
                     else {
                         if (!doneOff) {
                             doneOff = true;
                             doneNum++;
                         }
-                        robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                        robot.intake.setIntakeState(Intake.IntakeState.OFF);
                         robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     }
                     if (pathTimer.getElapsedTimeSeconds() > moveThreshold)
@@ -126,7 +126,7 @@ public class TwelveBall extends OpMode {
                 robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                 robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? pickup1(robot.getFollower()) : pickup1Blue(robot.getFollower()), true);
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
-                robot.intake.setUptakeState(Intake.UptakeState.BACK);
+                robot.intake.setUptakeState(Intake.UptakeState.SLOW);
 
                 setPathState(125);
                 }
@@ -147,7 +147,7 @@ public class TwelveBall extends OpMode {
             case 13:
                 if (!robot.getFollower().isBusy()) {
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? shoot2(robot.getFollower()) : shoot2Blue(robot.getFollower()), true);
-                    robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                    robot.intake.setIntakeState(Intake.IntakeState.OFF);
                     robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     setPathState(14);
 
@@ -170,15 +170,15 @@ public class TwelveBall extends OpMode {
                 if (!robot.getFollower().isBusy()) {
                     if (robot.launcher.controller.done) {
                         doneOff = false;
-                        robot.intake.setIntakeState(Intake.IntakeState.SLOW);
-                        robot.intake.setUptakeState(Intake.UptakeState.SLOW);
+                        robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
+                        robot.intake.setUptakeState(Intake.UptakeState.ON);
                     }
                     else {
                         if (!doneOff) {
                             doneOff = true;
                             doneNum++;
                         }
-                        robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                        robot.intake.setIntakeState(Intake.IntakeState.OFF);
                         robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     }
                     if (pathTimer.getElapsedTimeSeconds() > moveThreshold)
@@ -193,7 +193,7 @@ public class TwelveBall extends OpMode {
                     robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? strafe1(robot.getFollower()) : strafe1Blue(robot.getFollower()), true);
                     robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
-                    robot.intake.setUptakeState(Intake.UptakeState.BACK);
+                    robot.intake.setUptakeState(Intake.UptakeState.SLOW);
 
                     setPathState(195);
                 }
@@ -209,7 +209,7 @@ public class TwelveBall extends OpMode {
             case 20:
                 if (!robot.getFollower().isBusy()) {
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? shoot3(robot.getFollower()) : shoot3Blue(robot.getFollower()), true);
-                    robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                    robot.intake.setIntakeState(Intake.IntakeState.OFF);
                     robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     setPathState(21);
 
@@ -232,15 +232,15 @@ public class TwelveBall extends OpMode {
                 if (!robot.getFollower().isBusy()) {
                     if (robot.launcher.controller.done) {
                         doneOff = false;
-                        robot.intake.setIntakeState(Intake.IntakeState.SLOW);
-                        robot.intake.setUptakeState(Intake.UptakeState.SLOW);
+                        robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
+                        robot.intake.setUptakeState(Intake.UptakeState.ON);
                     }
                     else {
                         if (!doneOff) {
                             doneOff = true;
                             doneNum++;
                         }
-                        robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                        robot.intake.setIntakeState(Intake.IntakeState.OFF);
                         robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     }
                     if (pathTimer.getElapsedTimeSeconds() > moveThreshold)
@@ -255,7 +255,7 @@ public class TwelveBall extends OpMode {
                     robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ? strafe2(robot.getFollower()) : strafe2Blue(robot.getFollower()), true);
                     robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
-                    robot.intake.setUptakeState(Intake.UptakeState.BACK);
+                    robot.intake.setUptakeState(Intake.UptakeState.SLOW);
 
                     setPathState(275);
                 }
@@ -270,7 +270,7 @@ public class TwelveBall extends OpMode {
             case 28:
                 if (!robot.getFollower().isBusy()) {
                     robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ?shoot4(robot.getFollower()) : shoot4Blue(robot.getFollower()), true);
-                    robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                    robot.intake.setIntakeState(Intake.IntakeState.OFF);
                     robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     setPathState(29);
 
@@ -293,15 +293,15 @@ public class TwelveBall extends OpMode {
                 if (!robot.getFollower().isBusy()) {
                     if (robot.launcher.controller.done) {
                         doneOff = false;
-                        robot.intake.setIntakeState(Intake.IntakeState.SLOW);
-                        robot.intake.setUptakeState(Intake.UptakeState.SLOW);
+                        robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
+                        robot.intake.setUptakeState(Intake.UptakeState.ON);
                     }
                     else {
                         if (!doneOff) {
                             doneOff = true;
                             doneNum++;
                         }
-                        robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                        robot.intake.setIntakeState(Intake.IntakeState.OFF);
                         robot.intake.setUptakeState(Intake.UptakeState.OFF);
                     }
                     if (pathTimer.getElapsedTimeSeconds() > moveThreshold)
@@ -315,7 +315,7 @@ public class TwelveBall extends OpMode {
                 doneNum = 0;
                     if (pathTimer.getElapsedTimeSeconds() > offThreshold) {
                         robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
-                        robot.intake.setIntakeState(Intake.IntakeState.STOP);
+                        robot.intake.setIntakeState(Intake.IntakeState.OFF);
                         robot.intake.setUptakeState(Intake.UptakeState.OFF);
                         robot.getFollower().followPath(robot.getAlliance() == Alliance.RED ?move(robot.getFollower()) : moveBlue(robot.getFollower()), true);
                         setPathState(36);

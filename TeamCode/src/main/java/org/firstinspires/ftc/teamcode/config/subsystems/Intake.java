@@ -14,40 +14,50 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.config.util.logging.LogType;
 import org.firstinspires.ftc.teamcode.config.util.logging.Logger;
 
-/*Sample subsystem class. Subsystems are anything on the robot that is not the drive train
+/*Subsystem class. Subsystems are anything on the robot that is not the drive train
 such as a claw or a lift.
 */
 @Config
 public class Intake extends SubsystemBase {
     //Telemetry = text that is printed on the driver station while the robot is running
     private MultipleTelemetry telemetry;
-    private Servo pusherL, pusherM,  pusherR;
+    private Servo gateL, gateR;
     public DcMotorEx intake, uptake;
-    public static double launchUptake = 1;
     public static double launchIntake = 1;
+    public static double launchUptake = 1;
+    public static double intakeUptake = .2;
+
+    public static boolean manual = false;
+
+    public static double gateLPos = 0.5;
+    public static double gateRPos = 0.5;
 
     private static double
             lOpen = 0.5,
-            lPush = 0.5,
-            mOpen = 0.5,
-            mPush = 0.5,
+            lClosed = 0.5,
             rOpen = 0.5,
-            rPush = 0.5;
+            rClosed = 0.5;
 
     public enum IntakeState {
         OUTTAKE,
         INTAKE,
-        STOP,
-        SLOW
+        OFF
     }
+
     public enum UptakeState {
         ON,
         OFF,
-        BACK,
         SLOW
     }
-    public IntakeState currentIntake = IntakeState.STOP;
+    public enum GateState {
+        OPEN,
+        CLOSED
+    }
+    public IntakeState currentIntake = IntakeState.OFF;
     public UptakeState currentUptake = UptakeState.OFF;
+    public GateState currentGate = GateState.CLOSED;
+
+    public static String leftGate = "sh3", rightGate = "sh4", intakePort = "em1", uptakePort = "cm1";
 
 
     //state of the subsystem
@@ -62,8 +72,10 @@ public class Intake extends SubsystemBase {
         //pusherM = hardwareMap.get(Servo.class, "cs2");
         //pusherM = hardwareMap.get(Servo.class, "cs3");
 
-        uptake = hardwareMap.get(DcMotorEx.class, "cm1");
-        intake = hardwareMap.get(DcMotorEx.class, "em1");
+        gateL = hardwareMap.get(Servo.class, leftGate);
+        gateR = hardwareMap.get(Servo.class, rightGate);
+        intake = hardwareMap.get(DcMotorEx.class, intakePort);
+        uptake = hardwareMap.get(DcMotorEx.class, uptakePort);
 
 
         intake.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -87,49 +99,60 @@ public class Intake extends SubsystemBase {
     public void setUptakeState(UptakeState uptakeState) {
         currentUptake = uptakeState;
     }
+    public void setGateState(GateState gateState) {
+        currentGate = gateState;
+    }
     public void periodic() {
         switch (currentIntake) {
-            case STOP:
+            case OFF:
                 intake.setPower(0);
                 break;
             case INTAKE:
-                intake.setPower(1);
+                intake.setPower(launchIntake);
                 break;
             case OUTTAKE:
                 intake.setPower(-1);
                 break;
-            case SLOW:
-                intake.setPower(launchIntake);
-                break;
         }
+
         switch (currentUptake) {
             case OFF:
                 uptake.setPower(0);
                 break;
             case ON:
-                uptake.setPower(1);
-
-                break;
-            case BACK:
-                uptake.setPower(-.9);
-                break;
-            case SLOW:
                 uptake.setPower(launchUptake);
-                break;
+            case SLOW:
+                uptake.setPower(intakeUptake);
+        }
+        if (!manual) {
+            switch (currentGate) {
+                case OPEN:
+                    gateL.setPosition(lOpen);
+                    gateR.setPosition(rOpen);
+                    break;
+                case CLOSED:
+                    gateL.setPosition(lClosed);
+                    gateR.setPosition(rClosed);
+                    break;
+            }
+        }
+        else {
+            gateL.setPosition(gateLPos);
+            gateR.setPosition(gateRPos);
         }
 
         telemetry.addData("Intake amps", intake.getCurrent(CurrentUnit.AMPS));
     }
 
     public void init() {
-        setIntakeState(IntakeState.STOP);
+        setIntakeState(IntakeState.OFF);
         intake.setPower(0);
-        setUptakeState(UptakeState.OFF);
-        uptake.setPower(0);
+        setGateState(GateState.CLOSED);
+        gateL.setPosition(lClosed);
+        gateR.setPosition(rClosed);
     }
 
     public void log(){
         Logger.logData(LogType.INTAKE_POWER, String.valueOf(intake.getPower()));
-        Logger.logData(LogType.UPTAKE_POWER, String.valueOf(uptake.getPower()));
     }
 }

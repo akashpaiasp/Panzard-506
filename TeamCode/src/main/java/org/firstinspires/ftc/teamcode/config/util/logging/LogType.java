@@ -22,7 +22,6 @@ public enum LogType {
     ROBOT_Y("y", "in"),
     ROBOT_HEADING("heading", "degrees"),
     INTAKE_POWER("Intake power", "power"),
-    UPTAKE_POWER("Uptake power", "power"),
     BOOST("Boost", "boolean"),
 
     AGGRESSIVE("Aggressive", "boolean"),

@@ -1,10 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
-import static org.firstinspires.ftc.teamcode.config.core.Robot.alliance;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.blueX;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.goalY;
-import static org.firstinspires.ftc.teamcode.config.core.Robot.redX;
+import static org.firstinspires.ftc.teamcode.config.core.Robot.*;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,13 +8,11 @@ import com.seattlesolvers.solverslib.command.CommandScheduler;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.config.commands.Aim;
-import org.firstinspires.ftc.teamcode.config.commands.AimLimelight;
+import org.firstinspires.ftc.teamcode.config.commands.*;
 import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.util.logging.CSVInterface;
-import org.firstinspires.ftc.teamcode.config.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.config.subsystems.Launcher;
+import org.firstinspires.ftc.teamcode.config.subsystems.*;
 import org.firstinspires.ftc.teamcode.config.util.Timer;
 
 @Config
@@ -65,28 +59,18 @@ public class Teleop extends LinearOpMode {
             if (gamepad1.right_trigger > 0.3) {
                 robot.uptakeOff = false;
                 robot.intakeOff = true;
+                robot.intake.setGateState(Intake.GateState.CLOSED);
                 robot.intake.setIntakeState(Intake.IntakeState.INTAKE);
-                robot.intake.setUptakeState(Intake.UptakeState.BACK);
+                robot.intake.setUptakeState(Intake.UptakeState.SLOW);
             }
             else if (gamepad1.left_trigger > 0.3) {
                 //robot.uptakeOff = true;
                 robot.intake.setIntakeState(Intake.IntakeState.OUTTAKE);
+                robot.intake.setUptakeState(Intake.UptakeState.SLOW);
             }
             else {
-                if (!gamepad2.right_bumper) {
-                    //robot.uptakeOff = true;
-                    //if (robot.uptakeOff)
-                        robot.intake.setUptakeState(Intake.UptakeState.OFF);
-                }
                 if (robot.intakeOff)
-                    robot.intake.setIntakeState(Intake.IntakeState.STOP);
-            }
-
-            if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
-                if (robot.launcherOff) {
-                    robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
-                    //robot.led.setState(MyLED.State.RED);
-                }
+                    robot.intake.setIntakeState(Intake.IntakeState.OFF);
             }
 
             if (gamepad1.dpad_up) {
@@ -97,21 +81,18 @@ public class Teleop extends LinearOpMode {
                 robot.intakeOff = true;
             }
 
-            if(!gamepad1.right_bumper) {
-                /*if (robot.limelight.getResult().isValid() && robot.turret.getTotalDegrees() < 90 && robot.turret.getTotalDegrees() > -90) {
-                    robot.turret.limelightMode = true;
-                    new AimLimelight(robot).execute();
-                }
-                else { */
-                    robot.turret.limelightMode = false;
-                    new Aim(robot, alliance == Alliance.RED ? redX : blueX, goalY).execute();
-                //}
-            }
+            //if(!gamepad1.right_bumper) {
 
-            if (gamepad1.right_bumper || gamepad2.right_bumper)
+                    new Aim(robot, alliance == Alliance.RED ? redX : blueX, goalY).execute();
+            //}
+
+            if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 robot.launcher.setLauncherState(Launcher.LauncherState.OUT);
-            else
+                robot.intake.setGateState(Intake.GateState.OPEN);
+            }
+            else {
                 robot.launcher.setLauncherState(Launcher.LauncherState.STOP);
+            }
             //Runs all gamepad triggers
             CommandScheduler.getInstance().run();
 
@@ -188,7 +169,6 @@ public class Teleop extends LinearOpMode {
 
         }
         CSVInterface.log();
-        robot.getFollower().getVelocity().getMagnitude();
     }
 
 }

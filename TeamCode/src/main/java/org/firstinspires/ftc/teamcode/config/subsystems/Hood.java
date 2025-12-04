@@ -23,6 +23,7 @@ public class Hood extends SubsystemBase {
     public Servo hood;
     public double hoodDown = 1, hoodMid = 0.75, hoodMidUp = 0.45, hoodUp = 0.34;
     public static double target = 0.0;
+    public static String hoodPort = "sh0";
 
     public enum HoodState {
         UP,
@@ -38,7 +39,7 @@ public class Hood extends SubsystemBase {
         this.telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         //init servos based on their name in the robot's config file
-        hood = hardwareMap.get(Servo.class, "sh0");
+        hood = hardwareMap.get(Servo.class, hoodPort);
         target = 0.0;
     }
 

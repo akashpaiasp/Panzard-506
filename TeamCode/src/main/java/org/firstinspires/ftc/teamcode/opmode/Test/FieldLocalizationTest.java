@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmode.Test;
 
 import static org.firstinspires.ftc.teamcode.config.core.Robot.autoEndPose;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.seattlesolvers.solverslib.gamepad.GamepadEx;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.config.core.Robot;
 import org.firstinspires.ftc.teamcode.config.core.util.Alliance;
 import org.firstinspires.ftc.teamcode.config.util.logging.CSVInterface;
 
+@Disabled
 @TeleOp
 public class FieldLocalizationTest extends LinearOpMode {
     private Robot robot;

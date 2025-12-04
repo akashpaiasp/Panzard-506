@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.config.pedro;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.control.FilteredPIDFCoefficients;
 import com.pedropathing.control.PIDFCoefficients;
 import com.pedropathing.follower.Follower;
@@ -15,7 +16,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 //Pedro pathing constants
+
+@Config
 public class Constants {
+    public static String lf = "cm3", lr = "cm2", rf = "em2", rr = "em3";
+
     //Pid/acceleration constants derived from tuning (last year's values)
     public static FollowerConstants followerConstants = new FollowerConstants()
             .mass(8.9)
@@ -35,10 +40,10 @@ public class Constants {
     //Constants relating to the 4 drive motors
     public static MecanumConstants driveConstants = new MecanumConstants()
             //Motor names in the robot's config file
-            .leftFrontMotorName("em3")
-            .leftRearMotorName("em2")
-            .rightFrontMotorName("cm2")
-            .rightRearMotorName("cm3")
+            .leftFrontMotorName(lf)
+            .leftRearMotorName(lr)
+            .rightFrontMotorName(rf)
+            .rightRearMotorName(rr)
 
             //Motor directions
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)

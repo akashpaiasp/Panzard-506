@@ -22,7 +22,7 @@ public class Fire3 extends CommandBase {
     @Override
     public void execute() {
         if (!r.launcher.controller.done) {
-            r.intake.setIntakeState(Intake.IntakeState.STOP);
+            r.intake.setIntakeState(Intake.IntakeState.OFF);
             r.intake.setUptakeState(Intake.UptakeState.OFF);
             finished = false;
         }
@@ -42,7 +42,7 @@ public class Fire3 extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         r.launcher.setLauncherState(Launcher.LauncherState.STOP);
-        r.intake.setIntakeState(Intake.IntakeState.STOP);
+        r.intake.setIntakeState(Intake.IntakeState.OFF);
         r.intake.setUptakeState(Intake.UptakeState.OFF);
     }
 
